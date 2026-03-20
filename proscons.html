@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Pros & Cons – Two Approaches</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1200px; height: 675px; overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f7f8fa;
+  }
+
+  /* TOP ACCENT BAR */
+  .top-bar {
+    height: 6px;
+    background: linear-gradient(to right, #4CA38A 0%, #4CA38A 50%, #C9A96E 50%, #C9A96E 100%);
+  }
+
+  /* HEADER */
+  .header {
+    padding: 18px 48px 12px;
+    display: flex; align-items: baseline; justify-content: space-between;
+  }
+  .header h1 {
+    font-size: 26px; font-weight: 700; color: #1a1a2e; letter-spacing: -0.5px;
+  }
+  .header .subtitle { font-size: 13px; color: #6b7280; }
+
+  /* TWO COLUMNS */
+  .columns {
+    display: flex; gap: 20px;
+    padding: 0 32px 20px;
+    height: calc(675px - 100px);
+  }
+
+  .card {
+    flex: 1; border-radius: 16px; padding: 24px 26px;
+    display: flex; flex-direction: column; gap: 16px;
+    position: relative; overflow: hidden;
+  }
+  .card-values {
+    background: #F0F7F4;
+    border: 1.5px solid #D4EDE4;
+  }
+  .card-communities {
+    background: #FAF7F0;
+    border: 1.5px solid #EFE4CC;
+  }
+
+  /* CARD HEADER */
+  .card-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 4px;
+  }
+  .icon-circle {
+    width: 40px; height: 40px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .icon-values { background: #D4EDE4; }
+  .icon-communities { background: #EFE4CC; }
+
+  .option-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+    margin-bottom: 2px;
+  }
+  .option-label-values { color: #4CA38A; }
+  .option-label-communities { color: #C9A96E; }
+
+  .option-name {
+    font-size: 22px; font-weight: 700; color: #1a1a2e; letter-spacing: -0.4px;
+  }
+
+  /* PRO / CON SECTIONS */
+  .section-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+    margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+  }
+  .pro-title { color: #16a34a; }
+  .con-title { color: #dc2626; }
+
+  .items-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .item-row {
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .item-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+    font-size: 11px; font-weight: 700;
+  }
+  .pro-dot { background: #dcfce7; color: #16a34a; }
+  .con-dot { background: #fee2e2; color: #dc2626; }
+
+  .item-text {
+    font-size: 13px; color: #374151; line-height: 1.45;
+  }
+  .item-text strong { color: #1a1a2e; font-weight: 600; }
+
+  .divider {
+    height: 1px; background: #e5e7eb; margin: 2px 0;
+  }
+
+  /* FOOTER */
+  .footer {
+    position: absolute; bottom: 16px; left: 0; right: 0;
+    text-align: center; font-size: 11px; color: #9ca3af;
+  }
+  .footer strong { color: #6b7280; }
+</style>
+</head>
+<body>
+  <div class="top-bar"></div>
+
+  <div class="header">
+    <div>
+      <h1>Pros &amp; Cons – Two Approaches</h1>
+      <div class="subtitle">Strategic trade-offs for each implementation mode</div>
+    </div>
+  </div>
+
+  <div class="columns">
+
+    <!-- VALUES CARD -->
+    <div class="card card-values">
+      <div class="card-header">
+        <div class="icon-circle icon-values">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CA38A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="option-label option-label-values">Option 1</div>
+          <div class="option-name">Values</div>
+        </div>
+      </div>
+
+      <!-- PROS -->
+      <div>
+        <div class="section-title pro-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Pros
+        </div>
+        <div class="items-list">
+          <div class="item-row">
+            <div class="item-dot pro-dot">+</div>
+            <div class="item-text"><strong>Aligned with Clarity AI's core proposition</strong> — sustainability, ethics and impact as the product backbone</div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot pro-dot">+</div>
+            <div class="item-text"><strong>More data leverage</strong> — broader set of signals (spending, behaviour, preferences) can enrich value profiling</div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot pro-dot">+</div>
+            <div class="item-text"><strong>Higher defensibility</strong> — tied to Clarity's proprietary impact data and scoring engine</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- CONS -->
+      <div>
+        <div class="section-title con-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Cons
+        </div>
+        <div class="items-list">
+          <div class="item-row">
+            <div class="item-dot con-dot">−</div>
+            <div class="item-text"><strong>Values are harder to detect from transactions</strong> — mapping spending to abstract principles requires complex inference</div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot con-dot">−</div>
+            <div class="item-text"><strong>Higher friction onboarding</strong> — questionnaire-based entry adds steps and may reduce activation rate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMMUNITIES CARD -->
+    <div class="card card-communities">
+      <div class="card-header">
+        <div class="icon-circle icon-communities">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <div>
+          <div class="option-label option-label-communities">Option 2</div>
+          <div class="option-name">Communities</div>
+        </div>
+      </div>
+
+      <!-- PROS -->
+      <div>
+        <div class="section-title pro-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Pros
+        </div>
+        <div class="items-list">
+          <div class="item-row">
+            <div class="item-dot pro-dot">+</div>
+            <div class="item-text"><strong>Easier onboarding</strong> — no questionnaire needed, communities are auto-detected and suggested to users</div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot pro-dot">+</div>
+            <div class="item-text"><strong>Communities are easier to identify</strong> — lifestyle patterns (dining, sports, parenting) are clearly visible in transaction data</div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot pro-dot">+</div>
+            <div class="item-text"><strong>Higher engagement potential</strong> — identity-based communities drive stronger affinity and repeat usage</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- CONS -->
+      <div>
+        <div class="section-title con-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          Cons
+        </div>
+        <div class="items-list">
+          <div class="item-row">
+            <div class="item-dot con-dot">−</div>
+            <div class="item-text"><strong>Dilutes Clarity AI's brand</strong> — moves away from sustainability and impact, may confuse positioning</div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot con-dot">−</div>
+            <div class="item-text"><strong>Uncomfortable for some banks</strong> — lifestyle segmentation may feel intrusive or off-brand for certain client profiles</div>
+          </div>
+          <div class="item-row">
+            <div class="item-dot con-dot">−</div>
+            <div class="item-text"><strong>Lower barriers to entry</strong> — generic lifestyle perks can be replicated by PFM/VFM competitors without Clarity's data edge</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    Powered by <strong>CLARITY AI</strong> &nbsp;·&nbsp; Internal strategic analysis
+  </div>
+</body>
+</html>
