@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Communities — Human Rights Prototype</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: #d1d5db;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 32px 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* PHONE SHELL */
+.phone {
+  width: 390px;
+  height: 844px;
+  background: #f2f2f7;
+  border-radius: 44px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.3), 0 0 0 10px #1a1a1a, 0 0 0 12px #3a3a3a;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* STATUS BAR */
+.status-bar {
+  background: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+.status-bar.dark { color: #fff; }
+.status-icons { display: flex; gap: 5px; align-items: center; }
+
+/* SCREEN WRAPPER */
+.screen-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* INDIVIDUAL SCREENS */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(30px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+.screen.exit-left {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+/* SCROLLABLE BODY */
+.scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-body::-webkit-scrollbar { display: none; }
+
+/* =========================================================
+   SHARED COMPONENTS
+   ========================================================= */
+
+.nav-bar {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  z-index: 5;
+}
+.nav-title { font-size: 16px; font-weight: 600; color: #1a1a2e; letter-spacing: -0.2px; }
+.icon-btn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #1a1a2e; border-radius: 50%;
+  transition: background 0.15s;
+}
+.icon-btn:active { background: #f3f4f6; }
+
+.tab-bar {
+  background: #fff;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  flex-shrink: 0;
+}
+.tab-item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 0 18px;
+  cursor: pointer; gap: 4px;
+  color: #9ca3af; font-size: 11px; font-weight: 500;
+  transition: color 0.2s;
+}
+.tab-item.active { color: #0f9b8e; }
+.tab-item svg { width: 22px; height: 22px; }
+
+.section-header { padding: 20px 16px 8px; }
+.section-header h2 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
+.section-header p { font-size: 13px; color: #6b7280; }
+
+.see-all { text-align: center; padding: 10px 0 4px;
+  font-size: 13px; color: #0f9b8e; font-weight: 500; cursor: pointer; }
+
+.page-footer { padding: 24px 16px 12px; text-align: center; }
+.page-footer p { font-size: 12px; color: #9ca3af; line-height: 1.8; }
+.page-footer a { color: #6b7280; text-decoration: underline; }
+
+/* =========================================================
+   SCREEN 1 — HOME BANKING
+   ========================================================= */
+#screen-home { background: #f2f2f7; }
+#screen-home .status-bar { background: #fff; }
+
+.home-header {
+  background: #fff;
+  padding: 12px 20px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.home-welcome { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+.home-header-icons { display: flex; gap: 6px; }
+
+.quick-actions {
+  background: #fff;
+  display: flex; padding: 8px 16px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 8px;
+}
+.qa-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer;
+}
+.qa-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #f3f4f6; display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.qa-icon svg { width: 22px; height: 22px; color: #374151; }
+.qa-badge {
+  position: absolute; top: 1px; right: 1px;
+  width: 10px; height: 10px; background: #ef4444;
+  border-radius: 50%; border: 2px solid #fff;
+}
+.qa-label { font-size: 12px; color: #374151; font-weight: 500; }
+
+/* CLARITY AI BANNER */
+.clarity-banner {
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+  margin: 16px;
+  border-radius: 16px;
+  padding: 16px 16px;
+  cursor: pointer;
+  transition: transform 0.15s;
+  border: 1px solid #c7d2fe;
+}
+.clarity-banner:active { transform: scale(0.98); }
+.clarity-label { font-size: 10px; font-weight: 700; color: #7c3aed; letter-spacing: 0.8px; margin-bottom: 6px; }
+.clarity-title { font-size: 16px; font-weight: 700; color: #1e1b4b; margin-bottom: 4px; }
+.clarity-sub { font-size: 13px; color: #4338ca; line-height: 1.4; }
+.clarity-arrow { float: right; font-size: 20px; color: #4338ca; margin-top: -2px; }
+
+/* BALANCE */
+.balance-section { padding: 8px 20px 12px; background: #fff; margin: 0 0 1px; }
+.balance-label { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
+.balance-amount { font-size: 34px; font-weight: 800; color: #1a1a2e; letter-spacing: -1px; }
+
+/* ACCOUNTS CAROUSEL */
+.accounts-carousel {
+  display: flex; gap: 10px;
+  overflow-x: auto; padding: 12px 16px 16px;
+  background: #fff;
+  scroll-snap-type: x mandatory;
+}
+.accounts-carousel::-webkit-scrollbar { display: none; }
+.account-card {
+  background: #f9fafb; border-radius: 14px;
+  padding: 14px 16px; min-width: 150px;
+  scroll-snap-align: start; border: 1px solid #f0f0f0;
+}
+.account-num { font-size: 12px; color: #9ca3af; margin-bottom: 6px; display: flex; align-items: center; gap: 4px; }
+.account-balance { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
+.account-type { font-size: 11px; color: #9ca3af; }
+
+/* TRANSACTIONS */
+.transactions-section { background: #fff; margin-top: 8px; }
+.txn-header { padding: 16px 20px 8px; font-size: 18px; font-weight: 700; color: #1a1a2e; }
+.txn-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f9fafb;
+  cursor: pointer;
+}
+.txn-item:last-child { border-bottom: none; }
+.txn-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #f3f4f6; display: flex; align-items: center;
+  justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+.txn-info { flex: 1; }
+.txn-name { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+.txn-date { font-size: 12px; color: #9ca3af; margin-top: 1px; }
+.txn-amount { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+
+/* =========================================================
+   SCREEN 2 — INTRO / ONBOARDING
+   ========================================================= */
+#screen-intro {
+  background: linear-gradient(180deg, #f0f4ff 0%, #e8eeff 100%);
+}
+#screen-intro .status-bar { background: transparent; }
+
+.intro-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px 32px; text-align: center;
+}
+.intro-illustration {
+  width: 140px; height: 140px; border-radius: 50%;
+  background: linear-gradient(135deg, #c7d2fe 0%, #e0e7ff 100%);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 32px; position: relative;
+  font-size: 56px;
+}
+.intro-badge {
+  position: absolute; top: 4px; right: 4px;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  display: flex; align-items: center; justify-content: center; font-size: 18px;
+}
+.intro-title {
+  font-size: 26px; font-weight: 800; color: #1e1b4b;
+  line-height: 1.2; margin-bottom: 16px;
+}
+.intro-subtitle {
+  font-size: 15px; color: #4338ca; line-height: 1.6;
+  margin-bottom: 24px;
+}
+.intro-powered { font-size: 12px; color: #6b7280; margin-bottom: 8px; }
+.intro-powered strong { color: #4338ca; font-weight: 700; letter-spacing: 0.3px; }
+.intro-legal { font-size: 11px; color: #9ca3af; line-height: 1.5; }
+.intro-legal a { color: #6b7280; text-decoration: underline; }
+
+.intro-actions {
+  padding: 16px 24px 32px;
+  display: flex; flex-direction: column; gap: 12px;
+  background: transparent;
+}
+.btn-primary {
+  background: #1e1b4b; color: #fff;
+  border: none; border-radius: 99px;
+  padding: 16px 24px; font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s, transform 0.1s;
+  text-align: center;
+}
+.btn-primary:active { transform: scale(0.97); }
+.btn-ghost {
+  background: transparent; color: #6b7280;
+  border: none; font-size: 15px; font-weight: 500;
+  cursor: pointer; padding: 8px;
+}
+
+/* =========================================================
+   SCREEN 3 — VALUE SELECTION
+   ========================================================= */
+#screen-values { background: #fff; }
+
+.values-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px 14px;
+  border-bottom: 1px solid #f3f4f6;
+}
+.values-title { font-size: 16px; font-weight: 600; color: #1a1a2e; }
+
+.values-intro { padding: 20px 20px 8px; }
+.values-intro h2 { font-size: 22px; font-weight: 800; color: #1a1a2e; margin-bottom: 6px; }
+.values-intro p { font-size: 14px; color: #6b7280; line-height: 1.5; }
+
+.values-list { padding: 8px 16px; display: flex; flex-direction: column; gap: 10px; }
+.value-card {
+  background: #f9fafb; border-radius: 14px;
+  padding: 14px 14px;
+  display: flex; align-items: center; gap: 12px;
+  cursor: pointer; border: 2px solid transparent;
+  transition: all 0.2s;
+}
+.value-card.selected { background: #fff; }
+.value-card.selected.planet { border-color: #40916C; }
+.value-card.selected.rights { border-color: #7B68C4; }
+.value-card.selected.local  { border-color: #D4894E; }
+.value-card.selected.culture{ border-color: #4A8DBF; }
+
+.value-icon-circle {
+  width: 44px; height: 44px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.planet .value-icon-circle { background: #E8AwF0; }
+.rights .value-icon-circle { background: #F0ECF9; }
+.local  .value-icon-circle { background: #FFF3EB; }
+.culture.value-icon-circle, .culture .value-icon-circle { background: #EBF3FA; }
+
+.value-info { flex: 1; min-width: 0; }
+.value-name { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.value-tags { font-size: 12px; color: #9ca3af; margin-top: 2px;
+  white-space: nowraw; overflow: hidden; text-overflow: ellipsis; }
+
+.value-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+.radio-circle {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid #d1d5db; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.value-card.selected.rights .radio-circle { border-color: #7B68C4; background: #7B68C4; }
+.value-card.selected.rights .radio-circle::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; display: block; }
+.value-card.selected.planet .radio-circle { border-color: #40916C; background: #40916C; }
+.value-card.selected.planet .radio-circle::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; display: block; }
+.value-card.selected.local .radio-circle { border-color: #D4894E; background: #D4894E; }
+.value-card.selected.local .radio-circle::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; display: block; }
+.value-card.selected.culture .radio-circle { border-color: #4A8DBF; background: #4A8DBF; }
+.value-card.selected.culture .radio-circle::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; display: block; }
+
+.learn-btn {
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 99px; border: none; cursor: pointer; background: transparent;
+}
+.rights .learn-btn { color: #7B68C4; }
+.planet .learn-btn { color: #40916C; }
+.local  .learn-btn  { color: #D4894E; }
+.culture .learn-btn { color: #4A8DBF; }
+
+.values-cta {
+  padding: 16px 16px 32px;
+}
+.continue-btn {
+  width: 100%; padding: 16px;
+  border-radius: 99px; border: none;
+  font-size: 16px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: all 0.2s;
+}
+.continue-btn.inactive { background: #f3f4f6; color: #d1d5db; pointer-events: none; }
+.continue-btn.active   { background: #1a1a2e; color: #fff; }
+
+/* =========================================================
+   SCREEN 4 — DASHBOARD (My Impact + Explore)
+   ========================================================= */
+#screen-dashboard { background: #f2f2f7; }
+
+/* SCORE CARD */
+.score-card {
+  background: #fff; margin: 16px 16px 0;
+  border-radius: 16px; padding: 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.score-card-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+.score-card-sub { font-size: 13px; color: #6b7280; line-height: 1.4; margin-bottom: 16px; }
+.score-num { font-size: 48px; font-weight: 800; color: #0f9b8e; line-height: 1; }
+.score-num span { font-size: 22px; font-weight: 500; color: #9ca3af; }
+.score-track { background: #e5e7eb; border-radius: 99px; height: 8px; margin: 12px 0 8px; overflow: hidden; }
+.score-fill { height: 100%; background: linear-gradient(90deg, #0f9b8e, #14b8a6); border-radius: 99px; width: 72%; }
+.score-milestone { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
+.score-link { font-size: 13px; color: #0f9b8e; font-weight: 500; display: block; margin-bottom: 14px; cursor: pointer; }
+.score-note {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: #f9fafb; border-radius: 10px; padding: 10px 12px;
+}
+.score-note p { font-size: 12px; color: #6b7280; line-height: 1.4; flex: 1; }
+.score-note svg { width: 16px; height: 16px; color: #9ca3af; flex-shrink: 0; margin-top: 1px; }
+
+/* INSIGHTS */
+.insights-list { padding: 0 16px; display: flex; flex-direction: column; gap: 8px; }
+.insight-item {
+  background: #fff; border-radius: 12px; padding: 14px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.i-icon {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 17px;
+}
+.i-green { background: #dcfce7; } .i-teal { background: #ccfbf1; }
+.i-yellow { background: #fef9c3; } .i-purple { background: #ede9fe; }
+.i-pink { background: #fce7f3; }
+.i-text { flex: 1; font-size: 14px; color: #374151; font-weight: 500; line-height: 1.4; }
+.i-info svg { width: 18px; height: 18px; color: #d1d5db; }
+
+/* MERCHANTS */
+.merchant-tabs { display: flex; border-bottom: 1px solid #e5e7eb; margin: 0 16px 12px; }
+.m-tab {
+  padding: 8px 16px; font-size: 14px; font-weight: 500; color: #9ca3af;
+  cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.m-tab.active { color: #0f9b8e; border-bottom-color: #0f9b8e; }
+.merchant-scroll {
+  display: flex; gap: 12px;
+  overflow-x: auto; padding: 0 16px 8px;
+  scroll-snap-type: x mandatory;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+.merchant-scroll.dragging { cursor: grabbing; }
+.merchant-scroll::-webkit-scrollbar { display: none; }
+.merchant-card {
+  background: #fff; border-radius: 14px; padding: 16px;
+  min-width: 200px; max-width: 200px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  flex-shrink: 0; scroll-snap-align: start;
+  user-select: none;
+}
+.m-logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.m-logo {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 12px; color: #fff; flex-shrink: 0;
+}
+.m-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+.m-cat { font-size: 11px; color: #9ca3af; }
+.m-desc { font-size: 12px; color: #6b7280; line-height: 1.5; margin-bottom: 12px; }
+.m-footer { display: flex; align-items: center; justify-content: space-between; }
+.m-why { font-size: 12px; color: #0f9b8e; font-weight: 500; cursor: pointer; }
+.m-actions { display: flex; gap: 6px; }
+.m-action {
+  width: 30px; height: 30px; border-radius: 50%;
+  border: 1px solid #e5e7eb; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; font-size: 13px;
+}
+
+/* TAKE ACTION */
+.take-action-wrap { padding: 0 16px; }
+.ta-card { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,0.06); margin-bottom: 10px; }
+.give-back-hdr {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px; border-bottom: 1px solid #f3f4f6;
+}
+.gb-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #fce7f3; display: flex; align-items: center;
+  justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.gb-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.gb-sub { font-size: 12px; color: #6b7280; }
+.ngo-list { padding: 4px 0; }
+.ngo-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; border-bottom: 1px solid #f9fafb;
+}
+.ngo-row:last-child { border-bottom: none; }
+.ngo-logo {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: #fff; flex-shrink: 0;
+}
+.ngo-info { flex: 1; min-width: 0; }
+.ngo-name { font-size: 13px; font-weight: 700; color: #1a1a2e; }
+.ngo-desc { font-size: 11px; color: #6b7280; white-space: nowraw; overflow: hidden; text-overflow: ellipsis; }
+.donate-btn {
+  background: #0f9b8e; color: #fff; border: none; border-radius: 99px;
+  padding: 7px 14px; font-size: 12px; font-weight: 600; cursor: pointer; flex-shrink: 0;
+}
+
+.aligned-card {
+  background: #fff; border-radius: 16px; padding: 16px;
+  display: flex; align-items: center; gap: 12px;
+  opacity: 0.45; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.aligned-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: #f3f4f6; display: flex; align-items: center;
+  justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.aligned-info { flex: 1; }
+.aligned-title { font-size: 15px; font-weight: 700; color: #6b7280; }
+.aligned-desc { font-size: 12px; color: #9ca3af; margin-top: 2px; }
+.cs-badge {
+  background: #f3f4f6; color: #9ca3af; border-radius: 99px;
+  padding: 4px 10px; font-size: 11px; font-weight: 600; flex-shrink: 0;
+}
+
+/* =========================================================
+   EXPLORE
+   ========================================================= */
+.articles-scroll {
+  display: flex; gap: 12px;
+  overflow-x: auto; padding: 0 16px 4px;
+  scroll-snap-type: x mandatory;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+.articles-scroll.dragging { cursor: grabbing; }
+.articles-scroll::-webkit-scrollbar { display: none; }
+.article-card {
+  background: #fff; border-radius: 14px; overflow: hidden;
+  min-width: 210px; max-width: 210px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  flex-shrink: 0; scroll-snap-align: start;
+  user-select: none;
+}
+.article-img {
+  width: 100%; height: 112px;
+  display: flex; align-items: center; justify-content: center;
+  position: relative;
+}
+.art1 { background: #e8e8ee; }
+.art2 { background: #e5eceb; }
+.art3 { background: #edeae5; }
+.article-body { padding: 12px 14px 14px; }
+.article-title { font-size: 14px; font-weight: 700; color: #1a1a2e; line-height: 1.4; margin-bottom: 6px; }
+.article-excerpt {
+  font-size: 12px; color: #6b7280; line-height: 1.5; margin-bottom: 8px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.article-meta { font-size: 11px; color: #9ca3af; }
+
+/* MYTH BUSTER */
+.myth-card {
+  margin: 0 16px;
+  background: #fefce8; border-radius: 16px; padding: 20px;
+  border: 1px solid #fef08a;
+}
+.myth-badge {
+  display: inline-block; background: #fef08a; color: #854d0e;
+  font-size: 11px; font-weight: 800; padding: 3px 10px;
+  border-radius: 99px; letter-spacing: 0.5px; margin-bottom: 12px;
+}
+.myth-text { font-size: 16px; font-weight: 700; color: #1a1a2e; line-height: 1.4; margin-bottom: 16px; }
+.bust-btn {
+  background: #0f9b8e; color: #fff; border: none;
+  border-radius: 99px; padding: 10px 22px; font-size: 14px;
+  font-weight: 600; cursor: pointer; margin-bottom: 16px; display: block;
+}
+.myth-reveal {
+  display: none; background: #fff; border-radius: 12px;
+  padding: 14px; margin-bottom: 16px;
+  font-size: 13px; color: #374151; line-height: 1.5;
+  border-left: 3px solid #0f9b8e;
+}
+.myth-reveal.show { display: block; }
+.myth-pages { display: flex; align-items: center; justify-content: center; gap: 16px; }
+.myth-nav {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: #fff; border: 1px solid #e5e7eb;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 14px;
+}
+.myth-count { font-size: 13px; color: #6b7280; font-weight: 500; }
+
+/* NEWS */
+.news-wrap { padding: 0 16px; }
+.news-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid #f3f4f6; cursor: pointer;
+}
+.news-item:last-child { border-bottom: none; }
+.news-icon {
+  width: 36px; height: 36px; border-radius: 8px;
+  background: #f3f4f6; display: flex; align-items: center;
+  justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+.news-title { font-size: 14px; font-weight: 600; color: #1a1a2e; line-height: 1.4; margin-bottom: 3px; }
+.news-meta { font-size: 11px; color: #9ca3af; }
+
+/* QUIZZES */
+.quiz-grid { padding: 0 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.quiz-card {
+  background: #fff; border-radius: 14px; padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); cursor: pointer;
+}
+.quiz-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 10px; }
+.q-yellow { background: #fef9c3; } .q-purple { background: #ede9fe; }
+.quiz-title { font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.4; margin-bottom: 6px; }
+.quiz-meta { font-size: 11px; color: #9ca3af; }
+
+/* SUB-SCREEN SWITCHING (My Impact vs Explore) */
+.sub-screen { display: none; }
+.sub-screen.active { display: block; }
+
+/* =========================================================
+   BENEFITS TAB
+   ========================================================= */
+.benefits-section-hdr { padding: 20px 16px 10px; }
+.benefits-section-hdr h2 { font-size: 17px; font-weight: 700; color: #1a1a2e; }
+
+.reward-card {
+  background: #fff; margin: 0 16px 10px; border-radius: 14px;
+  padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.reward-card.locked { opacity: 0.55; }
+.reward-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0;
+}
+.r-green { background: #dcfce7; } .r-teal { background: #ccfbf1; } .r-gray { background: #f3f4f6; }
+.reward-body { flex: 1; min-width: 0; }
+.reward-title { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
+.reward-subtitle { font-size: 12px; color: #6b7280; margin-bottom: 8px; line-height: 1.4; }
+.reward-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;
+}
+.rs-active { background: #dcfce7; color: #15803d; }
+.rs-locked { background: #f3f4f6; color: #9ca3af; }
+.reward-used { font-size: 12px; color: #6b7280; margin-top: 6px; }
+.reward-used strong { color: #0f9b8e; }
+
+.benefit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
+.benefit-partner-card {
+  background: #fff; border-radius: 14px; padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center;
+  cursor: pointer; transition: transform 0.15s;
+}
+.benefit-partner-card:active { transform: scale(0.97); }
+.bp-logo {
+  width: 52px; height: 52px; border-radius: 14px; margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; color: #fff;
+}
+.bp-name { font-size: 13px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+.bp-discount {
+  display: inline-block; background: #f0fdf4; color: #15803d;
+  font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-bottom: 6px;
+}
+.bp-desc { font-size: 11px; color: #9ca3af; line-height: 1.4; }
+.benefit-partner-card-wide {
+  background: #fff; border-radius: 14px; padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex; align-items: center; gap: 14px; cursor: pointer;
+  transition: transform 0.15s; margin: 0 16px;
+}
+.benefit-partner-card-wide:active { transform: scale(0.98); }
+.bpw-info { flex: 1; }
+.bpw-name { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
+.bpw-desc { font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+
+/* =========================================================
+   COMMUNITY TAB
+   ========================================================= */
+.community-hero {
+  margin: 16px 16px 0; border-radius: 16px; overflow: hidden;
+  background: linear-gradient(135deg, #4c1d95 0%, #7B68C4 100%);
+  padding: 20px; color: #fff; position: relative;
+}
+.ch-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(255,255,255,0.2); border-radius: 99px;
+  padding: 4px 10px; font-size: 11px; font-weight: 700; margin-bottom: 12px;
+}
+.ch-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.ch-sub { font-size: 13px; opacity: 0.85; margin-bottom: 16px; }
+.ch-joined-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 99px; padding: 6px 14px; font-size: 12px; font-weight: 600;
+}
+.ch-emoji { font-size: 24px; position: absolute; top: 20px; right: 20px; }
+
+.comm-stats-row {
+  display: flex; margin: 12px 16px 0; gap: 8px;
+}
+.comm-stat-card {
+  flex: 1; background: #fff; border-radius: 12px; padding: 14px 10px;
+  text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.cs-val { font-size: 16px; font-weight: 800; color: #1a1a2e; line-height: 1.2; }
+.cs-label { font-size: 10px; color: #9ca3af; font-weight: 500; margin-top: 3px; line-height: 1.3; }
+
+.challenge-card {
+  background: #fff; margin: 12px 16px 0; border-radius: 14px;
+  padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.cc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.cc-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.cc-active-badge {
+  background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 99px;
+}
+.cc-desc { font-size: 13px; color: #6b7280; margin-bottom: 14px; line-height: 1.4; }
+.cc-progress-label { font-size: 12px; color: #374151; font-weight: 600; margin-bottom: 5px; display: flex; justify-content: space-between; }
+.cc-track { background: #e5e7eb; border-radius: 99px; height: 7px; margin-bottom: 12px; overflow: hidden; }
+.cc-fill { height: 100%; border-radius: 99px; }
+.cc-fill-community { background: linear-gradient(90deg, #7B68C4, #a78bfa); }
+.cc-fill-personal { background: linear-gradient(90deg, #0f9b8e, #14b8a6); }
+.cc-reward { display: flex; align-items: center; gap: 8px; background: #f9fafb; border-radius: 10px; padding: 10px 12px; }
+.cc-reward-text { font-size: 13px; color: #374151; font-weight: 500; flex: 1; }
+.cc-pts { background: #7B68C4; color: #fff; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+
+.standing-card {
+  background: #fff; margin: 12px 16px 0; border-radius: 14px;
+  padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.standing-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.standing-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.standing-pct { font-size: 22px; font-weight: 800; color: #7B68C4; }
+.standing-label { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
+.standing-track { background: #e5e7eb; border-radius: 99px; height: 10px; position: relative; overflow: visible; margin-bottom: 8px; }
+.standing-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #7B68C4, #a78bfa); width: 85%; position: relative; }
+.standing-marker {
+  position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #7B68C4; border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(123,104,196,0.5);
+}
+.standing-sub { font-size: 12px; color: #9ca3af; }
+
+/* =========================================================
+   MODALS
+   ========================================================= */
+.modal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 100;
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-sheet {
+  background: #fff; width: 100%; border-radius: 20px 20px 0 0;
+  padding: 0 0 32px; max-height: 88%;
+  transform: translateY(20px); transition: transform 0.25s ease;
+  display: flex; flex-direction: column;
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-drag { width: 36px; height: 4px; background: #e5e7eb; border-radius: 99px; margin: 12px auto 0; flex-shrink: 0; }
+.modal-header {
+  padding: 16px 20px 12px; border-bottom: 1px solid #f3f4f6; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+.modal-close { font-size: 20px; color: #9ca3af; cursor: pointer; line-height: 1; padding: 4px; }
+.modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+.modal-body::-webkit-scrollbar { display: none; }
+.modal-got-it {
+  margin: 0 20px; padding: 14px; background: #1a1a2e; color: #fff;
+  border: none; border-radius: 99px; font-size: 15px; font-weight: 600;
+  cursor: pointer; width: calc(100% - 40px); flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+.modal-got-it:active { opacity: 0.85; }
+
+/* Value detail modal */
+.val-modal-hero {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  padding: 8px 0 20px;
+}
+.val-modal-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin-bottom: 12px;
+}
+.val-modal-name { font-size: 20px; font-weight: 800; color: #1a1a2e; margin-bottom: 8px; }
+.val-modal-desc { font-size: 13px; color: #6b7280; line-height: 1.6; }
+.val-modal-behav-hdr {
+  font-size: 10px; font-weight: 800; color: #9ca3af; letter-spacing: 0.8px;
+  margin: 16px 0 10px;
+}
+.val-modal-tags { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 8px; }
+.val-tag {
+  padding: 5px 12px; border-radius: 99px; font-size: 12px; font-weight: 600;
+}
+.val-select-btn {
+  width: calc(100% - 40px); margin: 0 20px; padding: 14px;
+  border: none; border-radius: 99px; font-size: 15px; font-weight: 700;
+  cursor: pointer; color: #fff; flex-shrink: 0; transition: opacity 0.15s;
+}
+.val-select-btn:active { opacity: 0.85; }
+
+/* Insight modal */
+.insight-modal-icon {
+  width: 52px; height: 52px; border-radius: 50%; margin-bottom: 12px;
+  display: flex; align-items: center; justify-content: center; font-size: 24px;
+}
+.insight-modal-text { font-size: 14px; color: #374151; line-height: 1.6; }
+
+/* Methodology modal */
+.meth-section-title { font-size: 13px; font-weight: 700; color: #6b7280; letter-spacing: 0.5px; margin: 12px 0 8px; }
+.meth-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 8px 0; border-bottom: 1px solid #f9fafb;
+}
+.meth-row:last-child { border-bottom: none; }
+.meth-check { font-size: 15px; flex-shrink: 0; margin-top: 1px; }
+.meth-label { font-size: 13px; color: #374151; line-height: 1.4; }
+.tier-row {
+  display: flex; align-items: center; gap: 10px; padding: 8px 10px;
+  border-radius: 10px; margin-bottom: 6px;
+}
+.tier-pill {
+  font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 99px;
+  flex-shrink: 0; min-width: 72px; text-align: center;
+}
+.t-start { background: #f3f4f6; color: #6b7280; }
+.t-bronze { background: #fef3c7; color: #92400e; }
+.t-silver { background: #f1f5f9; color: #475569; }
+.t-gold   { background: #fef9c3; color: #854d0e; }
+.tier-desc { font-size: 12px; color: #6b7280; flex: 1; }
+
+/* Transactions modal */
+.txn-summary-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f0fdf4; border: 1px solid #bbf7d0;
+  border-radius: 99px; padding: 7px 14px; margin-bottom: 16px;
+  font-size: 13px; font-weight: 600; color: #15803d;
+}
+.modal-txn-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid #f9fafb;
+}
+.modal-txn-row:last-child { border-bottom: none; }
+.mtxn-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: #f3f4f6; display: flex; align-items: center;
+  justify-content: center; font-size: 16px; flex-shrink: 0;
+}
+.mtxn-info { flex: 1; }
+.mtxn-name { font-size: 13px; font-weight: 600; color: #1a1a2e; }
+.mtxn-cat { font-size: 11px; color: #9ca3af; }
+.mtxn-pts {
+  font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 99px;
+}
+.pts-pos { background: #dcfce7; color: #15803d; }
+.pts-none { background: #f3f4f6; color: #9ca3af; }
+
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- =====================================================
+       SCREEN 1: HOME BANKING
+       ===================================================== -->
+  <div class="screen-wrapper">
+
+  <div class="screen active" id="screen-home">
+    <div class="status-bar">
+      <span>9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 24 18" fill="currentColor"><rect x="0" y="6" width="4" height="12" rx="1"/><rect x="6.5" y="4" width="4" height="14" rx="1"/><rect x="13" y="1.5" width="4" height="16.5" rx="1"/><rect x="19.5" y="0" width="4" height="18" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><path d="M2 6C5.5 2 10 0 12 0s6.5 2 10 6l-2.2 2.2C17 5.2 14.7 3.5 12 3.5S7 5.2 4.2 8.2L2 6z"/><path d="M5.5 9.5C7.5 7 9.5 5.5 12 5.5s4.5 1.5 6.5 4l-2.2 2.2C14.8 9.7 13.5 9 12 9s-2.8.7-4.3 2.7L5.5 9.5z"/><circle cx="12" cy="14" r="2.5"/></svg>
+        <svg width="25" height="12" viewBox="0 0 30 14" fill="currentColor"><rect x="0" y="1" width="22" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="3" width="17" height="8" rx="1.5"/><rect x="23" y="4" width="3" height="6" rx="1.5" opacity="0.4"/></svg>
+      </div>
+    </div>
+    <div class="scroll-body">
+      <div class="home-header">
+        <div class="home-welcome">Welcome!</div>
+        <div class="home-header-icons">
+          <div class="icon-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div class="icon-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <div class="qa-item">
+          <div class="qa-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <span class="qa-label">Pay</span>
+        </div>
+        <div class="qa-item">
+          <div class="qa-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+          </div>
+          <span class="qa-label">Transfer</span>
+        </div>
+        <div class="qa-item">
+          <div class="qa-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <span class="qa-label">Receipts</span>
+        </div>
+        <div class="qa-item" onclick="goTo('screen-intro')">
+          <div class="qa-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <div class="qa-badge"></div>
+          </div>
+          <span class="qa-label" style="color:#4338ca;font-weight:600;">Beyond</span>
+        </div>
+      </div>
+
+      <!-- CLARITY BANNER -->
+      <div class="clarity-banner" onclick="goTo('screen-intro')">
+        <div class="clarity-label">POWERED BY CLARITY AI</div>
+        <span class="clarity-arrow">→</span>
+        <div class="clarity-title">Make your money promote your values.</div>
+        <div class="clarity-sub">Every transaction is a chance to support what matters to you.</div>
+      </div>
+
+      <!-- BALANCE -->
+      <div class="balance-section">
+        <div class="balance-label">Balance</div>
+        <div class="balance-amount">€17,896.83</div>
+      </div>
+
+      <div class="accounts-carousel" style="background:#fff;">
+        <div class="account-card">
+          <div class="account-num">*9012 📋</div>
+          <div class="account-balance">€2,230</div>
+          <div class="account-type">Checking account</div>
+        </div>
+        <div class="account-card">
+          <div class="account-num">*3456 📋</div>
+          <div class="account-balance">€500</div>
+          <div class="account-type">Savings account</div>
+        </div>
+        <div class="account-card">
+          <div class="account-num">*7812 📋</div>
+          <div class="account-balance">€14,800</div>
+          <div class="account-type">Credit account</div>
+        </div>
+      </div>
+
+      <div class="transactions-section">
+        <div class="txn-header">Recent transactions</div>
+        <div class="txn-item">
+          <div class="txn-icon">✈️</div>
+          <div class="txn-info"><div class="txn-name">Airline company</div><div class="txn-date">Today</div></div>
+          <div class="txn-amount">€320.46</div>
+        </div>
+        <div class="txn-item">
+          <div class="txn-icon">👕</div>
+          <div class="txn-info"><div class="txn-name">Apparel Brand</div><div class="txn-date">Yesterday</div></div>
+          <div class="txn-amount">€56.05</div>
+        </div>
+        <div class="txn-item">
+          <div class="txn-icon">🛒</div>
+          <div class="txn-info"><div class="txn-name">Supermarket</div><div class="txn-date">Monday</div></div>
+          <div class="txn-amount">€25.99</div>
+        </div>
+        <div class="txn-item">
+          <div class="txn-icon">☕</div>
+          <div class="txn-info"><div class="txn-name">Coffee Shop</div><div class="txn-date">Monday</div></div>
+          <div class="txn-amount">€8.40</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /screen-home -->
+
+
+  <!-- =====================================================
+       SCREEN 2: INTRO / ONBOARDING
+       ===================================================== -->
+  <div class="screen" id="screen-intro">
+    <div class="status-bar" style="background:transparent;">
+      <span>9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 24 18" fill="currentColor"><rect x="0" y="6" width="4" height="12" rx="1"/><rect x="6.5" y="4" width="4" height="14" rx="1"/><rect x="13" y="1.5" width="4" height="16.5" rx="1"/><rect x="19.5" y="0" width="4" height="18" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><path d="M2 6C5.5 2 10 0 12 0s6.5 2 10 6l-2.2 2.2C17 5.2 14.7 3.5 12 3.5S7 5.2 4.2 8.2L2 6z"/><path d="M5.5 9.5C7.5 7 9.5 5.5 12 5.5s4.5 1.5 6.5 4l-2.2 2.2C14.8 9.7 13.5 9 12 9s-2.8.7-4.3 2.7L5.5 9.5z"/><circle cx="12" cy="14" r="2.5"/></svg>
+        <svg width="25" height="12" viewBox="0 0 30 14" fill="currentColor"><rect x="0" y="1" width="22" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="3" width="17" height="8" rx="1.5"/><rect x="23" y="4" width="3" height="6" rx="1.5" opacity="0.4"/></svg>
+      </div>
+    </div>
+    <div class="icon-btn" style="position:absolute;top:44px;left:16px;z-index:10;" onclick="goTo('screen-home')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </div>
+
+    <div class="intro-body">
+      <div class="intro-illustration">
+        💙
+      </div>
+      <div class="intro-title">Make your money promote your values.</div>
+      <div class="intro-subtitle">Choose a cause you care about. We'll analyze your transactions and show you how your everyday spending already supports it, and how to do more.</div>
+      <div class="intro-powered">Powered by <strong>CLARITY AI</strong></div>
+      <div class="intro-legal">By proceeding, you consent to securely share your transaction data with Clarity AI for analysis. Learn more in <a href="#">Terms &amp; Conditions</a></div>
+    </div>
+    <div class="intro-actions">
+      <button class="btn-primary" onclick="goTo('screen-values')">Get started</button>
+      <button class="btn-ghost" onclick="goTo('screen-home')">Maybe later</button>
+    </div>
+  </div><!-- /screen-intro -->
+
+
+  <!-- =====================================================
+       SCREEN 3: VALUE SELECTION
+       ===================================================== -->
+  <div class="screen" id="screen-values">
+    <div class="status-bar" style="background:#fff;">
+      <span>9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 24 18" fill="currentColor"><rect x="0" y="6" width="4" height="12" rx="1"/><rect x="6.5" y="4" width="4" height="14" rx="1"/><rect x="13" y="1.5" width="4" height="16.5" rx="1"/><rect x="19.5" y="0" width="4" height="18" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><path d="M2 6C5.5 2 10 0 12 0s6.5 2 10 6l-2.2 2.2C17 5.2 14.7 3.5 12 3.5S7 5.2 4.2 8.2L2 6z"/><path d="M5.5 9.5C7.5 7 9.5 5.5 12 5.5s4.5 1.5 6.5 4l-2.2 2.2C14.8 9.7 13.5 9 12 9s-2.8.7-4.3 2.7L5.5 9.5z"/><circle cx="12" cy="14" r="2.5"/></svg>
+        <svg width="25" height="12" viewBox="0 0 30 14" fill="currentColor"><rect x="0" y="1" width="22" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="3" width="17" height="8" rx="1.5"/><rect x="23" y="4" width="3" height="6" rx="1.5" opacity="0.4"/></svg>
+      </div>
+    </div>
+    <div class="values-header">
+      <div class="icon-btn" onclick="goTo('screen-intro')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </div>
+      <div class="values-title">Select Your Value</div>
+      <div class="icon-btn" onclick="goTo('screen-home')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+    </div>
+    <div class="scroll-body">
+      <div class="values-intro">
+        <h2>What do you want to promote?</h2>
+        <p>Choose one value. We'll use your transactions to support it and show your impact.</p>
+      </div>
+      <div class="values-list">
+        <div class="value-card planet" id="vc-planet" onclick="selectValue('planet')">
+          <div class="value-icon-circle">🌍</div>
+          <div class="value-info">
+            <div class="value-name">Protect the Planet</div>
+            <div class="value-tags">Climate action, sustainability, circular...</div>
+          </div>
+          <div class="value-right">
+            <div class="radio-circle"></div>
+            <button class="learn-btn" onclick="event.stopPropagation(); openValueModal('planet')">Learn more</button>
+          </div>
+        </div>
+        <div class="value-card rights selected" id="vc-rights" onclick="selectValue('rights')">
+          <div class="value-icon-circle">🤝</div>
+          <div class="value-info">
+            <div class="value-name">Promote Human Rights</div>
+            <div class="value-tags">Fair labor, peace, justice, solidarity</div>
+          </div>
+          <div class="value-right">
+            <div class="radio-circle"></div>
+            <button class="learn-btn" onclick="event.stopPropagation(); openValueModal('rights')">Learn more</button>
+          </div>
+        </div>
+        <div class="value-card local" id="vc-local" onclick="selectValue('local')">
+          <div class="value-icon-circle">🏪</div>
+          <div class="value-info">
+            <div class="value-name">Support Local Economy</div>
+            <div class="value-tags">Small businesses, independent shops...</div>
+          </div>
+          <div class="value-right">
+            <div class="radio-circle"></div>
+            <button class="learn-btn" onclick="event.stopPropagation(); openValueModal('local')">Learn more</button>
+          </div>
+        </div>
+        <div class="value-card culture" id="vc-culture" onclick="selectValue('culture')">
+          <div class="value-icon-circle">📚</div>
+          <div class="value-info">
+            <div class="value-name">Promote Culture &amp; Knowledge</div>
+            <div class="value-tags">Arts, education, creativity, learning</div>
+          </div>
+          <div class="value-right">
+            <div class="radio-circle"></div>
+            <button class="learn-btn" onclick="event.stopPropagation(); openValueModal('culture')">Learn more</button>
+          </div>
+        </div>
+      </div>
+      <div class="values-cta">
+        <button class="continue-btn active" id="continue-btn" onclick="goTo('screen-dashboard')">Continue →</button>
+      </div>
+    </div>
+  </div><!-- /screen-values -->
+
+
+  <!-- =====================================================
+       SCREEN 4: DASHBOARD
+       ===================================================== -->
+  <div class="screen" id="screen-dashboard">
+    <div class="status-bar" style="background:#fff;">
+      <span>9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 24 18" fill="currentColor"><rect x="0" y="6" width="4" height="12" rx="1"/><rect x="6.5" y="4" width="4" height="14" rx="1"/><rect x="13" y="1.5" width="4" height="16.5" rx="1"/><rect x="19.5" y="0" width="4" height="18" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><path d="M2 6C5.5 2 10 0 12 0s6.5 2 10 6l-2.2 2.2C17 5.2 14.7 3.5 12 3.5S7 5.2 4.2 8.2L2 6z"/><path d="M5.5 9.5C7.5 7 9.5 5.5 12 5.5s4.5 1.5 6.5 4l-2.2 2.2C14.8 9.7 13.5 9 12 9s-2.8.7-4.3 2.7L5.5 9.5z"/><circle cx="12" cy="14" r="2.5"/></svg>
+        <svg width="25" height="12" viewBox="0 0 30 14" fill="currentColor"><rect x="0" y="1" width="22" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="3" width="17" height="8" rx="1.5"/><rect x="23" y="4" width="3" height="6" rx="1.5" opacity="0.4"/></svg>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="icon-btn" onclick="goTo('screen-values')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </div>
+      <div class="nav-title">Your Money Your Values</div>
+      <div class="icon-btn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </div>
+
+    <!-- SCROLL BODY CONTAINS SUB-SCREENS -->
+    <div class="scroll-body" id="dash-scroll">
+
+      <!-- SUB-SCREEN: MY IMPACT -->
+      <div class="sub-screen active" id="sub-myimpact">
+
+        <div class="score-card">
+          <div class="score-card-title">Your Human Rights Impact Score</div>
+          <div class="score-card-sub">How consistently your spending promotes human dignity and fair labor</div>
+          <div class="score-num">72<span>/100</span></div>
+          <div class="score-track"><div class="score-fill"></div></div>
+          <div class="score-milestone">Next milestone: 80 pts — unlock Gold tier</div>
+          <a class="score-link" onclick="openModal('modal-transactions')" style="cursor:pointer;">See contributing transactions →</a>
+          <div class="score-note">
+            <p>Points earned from purchases and actions that promote human rights</p>
+            <svg onclick="openModal('modal-methodology')" style="cursor:pointer;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+        </div>
+
+        <div class="section-header"><h2>Transaction Insights</h2><p>How your spending shapes your score this month</p></div>
+        <div class="insights-list">
+          <div class="insight-item"><div class="i-icon i-green">✓</div><div class="i-text">5 Fair Trade purchases this month</div><div class="i-info" onclick="openInsightModal(0)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div></div>
+          <div class="insight-item"><div class="i-icon i-teal">↗</div><div class="i-text">Your ethical spending is above the community average</div><div class="i-info" onclick="openInsightModal(1)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div></div>
+          <div class="insight-item"><div class="i-icon i-yellow">⚠</div><div class="i-text">2 merchants flagged for labor concerns</div><div class="i-info" onclick="openInsightModal(2)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div></div>
+          <div class="insight-item"><div class="i-icon i-purple">★</div><div class="i-text">3 of your brands are B Corp certified</div><div class="i-info" onclick="openInsightModal(3)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div></div>
+          <div class="insight-item"><div class="i-icon i-pink">♥</div><div class="i-text">2 donations to human rights orgs this quarter</div><div class="i-info" onclick="openInsightModal(4)" style="cursor:pointer;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></div></div>
+        </div>
+        <div class="see-all">See all insights →</div>
+
+        <div class="section-header"><h2>Discover Merchants</h2><p>Places aligned with your values, already trusted by people like you</p></div>
+        <div class="merchant-tabs">
+          <div class="m-tab active" onclick="switchMerchantTab(this)">Top Picks</div>
+          <div class="m-tab" onclick="switchMerchantTab(this)">New Discoveries</div>
+        </div>
+        <div class="merchant-scroll">
+          <div class="merchant-card">
+            <div class="m-logo-row"><div class="m-logo" style="background:#1a1a2e;">TGM</div><div><div class="m-name">The Giving Movement</div><div class="m-cat">Fashion &amp; Streetwear</div></div></div>
+            <div class="m-desc">Ethically made urban fashion in the UAE. Your purchase has a direct community impact.</div>
+            <div class="m-footer"><div class="m-why">Why we recommend this →</div><div class="m-actions"><div class="m-action">👍</div><div class="m-action">👎</div></div></div>
+          </div>
+          <div class="merchant-card">
+            <div class="m-logo-row"><div class="m-logo" style="background:#dc2626; font-size:18px;">🍒</div><div><div class="m-name">Ripe Market</div><div class="m-cat">Fresh Produce &amp; Local</div></div></div>
+            <div class="m-desc">Fresh groceries from local farms. Supporting small producers and fair wages.</div>
+            <div class="m-footer"><div class="m-why">Why we recommend this →</div><div class="m-actions"><div class="m-action">👍</div><div class="m-action">👎</div></div></div>
+          </div>
+          <div class="merchant-card">
+            <div class="m-logo-row"><div class="m-logo" style="background:#0f9b8e;">FC</div><div><div class="m-name">Fair Connect</div><div class="m-cat">B Corp Certified</div></div></div>
+            <div class="m-desc">Certified B Corp supplier promoting fair labor practices and transparent supply chains.</div>
+            <div class="m-footer"><div class="m-why">Why we recommend this →</div><div class="m-actions"><div class="m-action">👍</div><div class="m-action">👎</div></div></div>
+          </div>
+        </div>
+        <div class="see-all">See all merchants →</div>
+
+        <div class="section-header"><h2>Take Action</h2><p>Make your money work for your values</p></div>
+        <div class="take-action-wrap">
+          <div class="ta-card">
+            <div class="give-back-hdr">
+              <div class="gb-icon">♥</div>
+              <div><div class="gb-title">Give Back</div><div class="gb-sub">Support causes that reflect your values</div></div>
+            </div>
+            <div class="ngo-list">
+              <div class="ngo-row"><div class="ngo-logo" style="background:#f59e0b;">AI</div><div class="ngo-info"><div class="ngo-name">Amnesty International</div><div class="ngo-desc">Defending human rights worldwide</div></div><button class="donate-btn">Donate</button></div>
+              <div class="ngo-row"><div class="ngo-logo" style="background:#3b82f6;">UN</div><div class="ngo-info"><div class="ngo-name">UNICEF</div><div class="ngo-desc">Protecting children's rights globally</div></div><button class="donate-btn">Donate</button></div>
+              <div class="ngo-row"><div class="ngo-logo" style="background:#1a1a2e; font-size:9px;">HRW</div><div class="ngo-info"><div class="ngo-name">Human Rights Watch</div><div class="ngo-desc">Investigating and exposing abuses</div></div><button class="donate-btn">Donate</button></div>
+              <div class="ngo-row"><div class="ngo-logo" style="background:#16a34a;">Ox</div><div class="ngo-info"><div class="ngo-name">Oxfam</div><div class="ngo-desc">Fighting poverty and inequality</div></div><button class="donate-btn">Donate</button></div>
+              <div class="ngo-row"><div class="ngo-logo" style="background:#dc2626; font-size:9px;">MSF</div><div class="ngo-info"><div class="ngo-name">MSF</div><div class="ngo-desc">Providing emergency medical care</div></div><button class="donate-btn">Donate</button></div>
+            </div>
+          </div>
+          <div class="aligned-card">
+            <div class="aligned-icon">📈</div>
+            <div class="aligned-info"><div class="aligned-title">Aligned Investments</div><div class="aligned-desc">Funds and portfolios that invest in what you believe in</div></div>
+            <div class="cs-badge">Coming soon</div>
+          </div>
+        </div>
+
+        <div class="page-footer">
+          <p>Was this helpful? <a href="#">Share your feedback</a></p>
+          <p>Powered by <strong style="color:#6b7280;">CLARITY AI</strong></p>
+          <p><a href="#">About Clarity AI</a> &nbsp; <a href="#">Terms &amp; Conditions</a></p>
+        </div>
+      </div><!-- /sub-myimpact -->
+
+
+      <!-- SUB-SCREEN: EXPLORE -->
+      <div class="sub-screen" id="sub-explore">
+
+        <div class="section-header"><h2>Articles</h2><p>Stories and insights tailored to your values</p></div>
+        <div class="articles-scroll">
+          <div class="article-card">
+            <div class="article-img art1">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="8" fill="none"/><path d="M10 28V18l10-8 10 8v10H25v-6h-6v6H10z" fill="#b8b4cc" opacity="0.5"/><rect x="17" y="22" width="6" height="6" rx="1" fill="#9490b8" opacity="0.6"/></svg>
+            </div>
+            <div class="article-body">
+              <div class="article-title">The Hidden Human Cost of Fast Fashion</div>
+              <div class="article-excerpt">Behind every garment sold in Dubai Mall is a supply chain that stretches across 12 countries.</div>
+              <div class="article-meta">5 min read</div>
+            </div>
+          </div>
+          <div class="article-card">
+            <div class="article-img art2">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M20 8l1.8 5.4H27l-4.5 3.3 1.7 5.3L20 19l-4.2 3 1.7-5.3L13 13.4h5.2L20 8z" fill="#7bbbb5" opacity="0.55"/><circle cx="20" cy="26" r="5" stroke="#7bbbb5" stroke-width="1.5" opacity="0.45" fill="none"/></svg>
+            </div>
+            <div class="article-body">
+              <div class="article-title">How Your Spending Shapes Labor Rights Across Borders</div>
+              <div class="article-excerpt">From the farms of Jebel Ali to the logistics hubs of the region, your purchases send a signal.</div>
+              <div class="article-meta">6 min read</div>
+            </div>
+          </div>
+          <div class="article-card">
+            <div class="article-img art3">
+              <svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect x="10" y="12" width="20" height="16" rx="3" stroke="#b0a898" stroke-width="1.5" fill="none" opacity="0.6"/><path d="M14 19h12M14 23h8" stroke="#b0a898" stroke-width="1.5" stroke-linecap="round" opacity="0.6"/><circle cx="20" cy="9" r="3" fill="#b0a898" opacity="0.45"/></svg>
+            </div>
+            <div class="article-body">
+              <div class="article-title">Why B Corp Certification Actually Matters</div>
+              <div class="article-excerpt">Not all ethical labels are equal. Here's what B Corp really means for workers and communities.</div>
+              <div class="article-meta">4 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-header"><h2>Myth Buster</h2><p>Not everything you hear about ethics is true</p></div>
+        <div class="myth-card">
+          <div class="myth-badge">MYTH</div>
+          <div class="myth-text" id="myth-text">"Made in Italy" (or UK, USA, France) means fair labor conditions.</div>
+          <button class="bust-btn" onclick="bustMyth()">Bust it</button>
+          <div class="myth-reveal" id="myth-reveal">Country-of-origin labels only indicate where the final assembly happened. Many garments use components from countries with minimal labor protections — with no transparency required.</div>
+          <div class="myth-pages">
+            <div class="myth-nav" onclick="changeMyth(-1)">←</div>
+            <div class="myth-count" id="myth-count">1 / 4</div>
+            <div class="myth-nav" onclick="changeMyth(1)">→</div>
+          </div>
+        </div>
+
+        <div class="section-header"><h2>In the News</h2><p>What is happening in the world of human rights</p></div>
+        <div class="news-wrap">
+          <div class="news-item">
+            <div class="news-icon" style="background:#f3f4f6;display:flex;align-items:center;justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M18 10H8M18 6h-3"/></svg>
+            </div>
+            <div><div class="news-title">Spotlight on Ethical Production</div><div class="news-meta">Gulf News — 2 days ago</div></div>
+          </div>
+          <div class="news-item">
+            <div class="news-icon" style="background:#f3f4f6;display:flex;align-items:center;justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M18 10H8M18 6h-3"/></svg>
+            </div>
+            <div><div class="news-title">UAE Signs New Partnership to Improve Migrant Worker Housing Standards</div><div class="news-meta">The National — 4 days ago</div></div>
+          </div>
+          <div class="news-item">
+            <div class="news-icon" style="background:#f3f4f6;display:flex;align-items:center;justify-content:center;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8M18 10H8M18 6h-3"/></svg>
+            </div>
+            <div><div class="news-title">Amnesty International Expands Regional Operations from Abu Dhabi Office</div><div class="news-meta">Arabian Business — 1 week ago</div></div>
+          </div>
+        </div>
+
+        <div class="section-header"><h2>Quizzes</h2><p>Test what you know about the things you care about</p></div>
+        <div class="quiz-grid">
+          <div class="quiz-card"><div class="quiz-icon q-yellow">⚡</div><div class="quiz-title">How Ethical Is Your Spending?</div><div class="quiz-meta">5 questions · Easy</div></div>
+          <div class="quiz-card"><div class="quiz-icon q-purple">📖</div><div class="quiz-title">Know Your Rights: Supply Chain Edition</div><div class="quiz-meta">6 questions · Medium</div></div>
+        </div>
+
+        <div class="page-footer">
+          <p>Was this helpful? <a href="#">Share your feedback</a></p>
+          <p>Powered by <strong style="color:#6b7280;">CLARITY AI</strong></p>
+          <p><a href="#">About Clarity AI</a> &nbsp; <a href="#">Terms &amp; Conditions</a></p>
+        </div>
+      </div><!-- /sub-explore -->
+
+      <!-- SUB-SCREEN: BENEFITS -->
+      <div class="sub-screen" id="sub-benefits">
+
+        <!-- YOUR REWARDS -->
+        <div class="benefits-section-hdr" style="padding-top:20px;">
+          <h2>Your Rewards</h2>
+        </div>
+
+        <div class="reward-card">
+          <div class="reward-icon r-teal">🤝</div>
+          <div class="reward-body">
+            <div class="reward-title">Donation Matching</div>
+            <div class="reward-subtitle">We match your donations to human rights orgs up to $50 / month</div>
+            <div class="reward-status rs-active">
+              <span style="font-size:9px;">●</span> Active
+            </div>
+            <div class="reward-used">Used this month: <strong>AED 120 matched</strong></div>
+          </div>
+        </div>
+
+        <div class="reward-card">
+          <div class="reward-icon r-green">♻️</div>
+          <div class="reward-body">
+            <div class="reward-title">Fair Trade Cashback</div>
+            <div class="reward-subtitle">Earn 5% back on every purchase at Fair Trade certified merchants</div>
+            <div class="reward-status rs-active">
+              <span style="font-size:9px;">●</span> Active
+            </div>
+            <div class="reward-used">Earned this month: <strong>AED 18.40</strong></div>
+          </div>
+        </div>
+
+        <div class="reward-card locked">
+          <div class="reward-icon r-gray">🔒</div>
+          <div class="reward-body">
+            <div class="reward-title">Values Score Bonus</div>
+            <div class="reward-subtitle">Unlock exclusive perks and multiplied rewards for Gold tier members</div>
+            <div class="reward-status rs-locked">
+              🔒 Locked — Gold tier (86+ pts) required
+            </div>
+          </div>
+        </div>
+
+        <!-- YOUR BENEFITS -->
+        <div class="benefits-section-hdr" style="padding-top:8px;">
+          <h2>Your Benefits</h2>
+        </div>
+
+        <div class="benefit-grid">
+          <div class="benefit-partner-card">
+            <div class="bp-logo" style="background:#2d5016;">PT</div>
+            <div class="bp-name">People Tree</div>
+            <div class="bp-discount">15% off</div>
+            <div class="bp-desc">Fair Trade certified fashion brand</div>
+          </div>
+          <div class="benefit-partner-card">
+            <div class="bp-logo" style="background:#1a3a2e;">🏔️</div>
+            <div class="bp-name">Patagonia</div>
+            <div class="bp-discount">15% off</div>
+            <div class="bp-desc">B Corp outdoor &amp; ethical apparel</div>
+          </div>
+        </div>
+
+        <div class="benefit-partner-card-wide" style="margin-top:10px;">
+          <div class="bp-logo" style="background:#1a1a2e;width:48px;height:48px;border-radius:12px;font-size:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;flex-shrink:0;">TGM</div>
+          <div class="bpw-info">
+            <div class="bpw-name">The Giving Movement</div>
+            <div class="bpw-desc">Ethical streetwear — community impact with every purchase</div>
+            <div class="bp-discount" style="display:inline-block;">10% off</div>
+          </div>
+        </div>
+
+        <div class="page-footer" style="margin-top:12px;">
+          <p>Benefits refresh monthly. Based on your Human Rights Impact Score.</p>
+          <p>Powered by <strong style="color:#6b7280;">CLARITY AI</strong></p>
+        </div>
+
+      </div><!-- /sub-benefits -->
+
+      <!-- SUB-SCREEN: COMMUNITY -->
+      <div class="sub-screen" id="sub-community">
+
+        <!-- Community identity hero -->
+        <div class="community-hero" style="margin-top:16px;">
+          <div class="ch-emoji">🤝</div>
+          <div class="ch-badge">✓ You're a member</div>
+          <div class="ch-title">Human Rights Community</div>
+          <div class="ch-sub">4,200 members across the UAE standing up for human dignity through their everyday spending</div>
+          <div class="ch-joined-badge">
+            <span>✓</span> Joined since Jan 2026
+          </div>
+        </div>
+
+        <!-- Collective impact stats -->
+        <div class="comm-stats-row">
+          <div class="comm-stat-card">
+            <div class="cs-val">AED 47K</div>
+            <div class="cs-label">Donated collectively</div>
+          </div>
+          <div class="comm-stat-card">
+            <div class="cs-val">12,400</div>
+            <div class="cs-label">Ethical purchases</div>
+          </div>
+          <div class="comm-stat-card">
+            <div class="cs-val">890</div>
+            <div class="cs-label">Aligned merchants</div>
+          </div>
+        </div>
+
+        <!-- Community challenge -->
+        <div class="section-header" style="padding-top:18px;"><h2>Community Challenge</h2><p>This month's collective action</p></div>
+        <div class="challenge-card">
+          <div class="cc-top">
+            <div class="cc-title">Fair Trade March</div>
+            <div class="cc-active-badge">Active</div>
+          </div>
+          <div class="cc-desc">The community goal: make 10,000 Fair Trade purchases this month. Every certified purchase you make counts.</div>
+
+          <div class="cc-progress-label">
+            <span>Community progress</span><span style="color:#7B68C4;font-weight:700;">6,800 / 10,000</span>
+          </div>
+          <div class="cc-track"><div class="cc-fill cc-fill-community" style="width:68%;"></div></div>
+
+          <div class="cc-progress-label">
+            <span>Your contribution</span><span style="color:#0f9b8e;font-weight:700;">9 / 20 purchases</span>
+          </div>
+          <div class="cc-track"><div class="cc-fill cc-fill-personal" style="width:45%;"></div></div>
+
+          <div class="cc-reward">
+            <span style="font-size:16px;">🏆</span>
+            <div class="cc-reward-text">Complete your goal: earn a bonus reward</div>
+            <div class="cc-pts">+50 pts</div>
+          </div>
+        </div>
+
+        <!-- Your standing -->
+        <div class="section-header" style="padding-top:18px;"><h2>Your Standing</h2><p>How you compare within the community</p></div>
+        <div class="standing-card">
+          <div class="standing-top">
+            <div>
+              <div class="standing-title">Top 15%</div>
+              <div class="standing-label">of all Human Rights Community members</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="standing-pct">85th</div>
+              <div style="font-size:11px;color:#9ca3af;">percentile</div>
+            </div>
+          </div>
+          <div class="standing-track">
+            <div class="standing-fill">
+              <div class="standing-marker"></div>
+            </div>
+          </div>
+          <div class="standing-sub">Keep shopping ethically to climb the leaderboard and unlock higher-tier benefits</div>
+        </div>
+
+        <div class="page-footer" style="margin-top:16px;">
+          <p>Community data refreshes weekly</p>
+          <p>Powered by <strong style="color:#6b7280;">CLARITY AI</strong></p>
+        </div>
+
+      </div><!-- /sub-community -->
+
+    </div><!-- /dash-scroll -->
+
+    <div class="tab-bar">
+      <div class="tab-item active" id="tab-myimpact" onclick="switchDashTab('myimpact', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        My Impact
+      </div>
+      <div class="tab-item" id="tab-explore" onclick="switchDashTab('explore', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        Explore
+      </div>
+      <div class="tab-item" id="tab-benefits" onclick="switchDashTab('benefits', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+        Benefits
+      </div>
+      <div class="tab-item" id="tab-community" onclick="switchDashTab('community', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Community
+      </div>
+    </div>
+  </div><!-- /screen-dashboard -->
+
+  </div><!-- /screen-wrapper -->
+
+  <!-- =====================================================
+       VALUE MODALS (Learn more — one per value)
+       ===================================================== -->
+
+  <!-- Planet -->
+  <div class="modal-overlay" id="modal-val-planet" onclick="handleOverlayClick(event, 'modal-val-planet')">
+    <div class="modal-sheet">
+      <div class="modal-drag"></div>
+      <div class="modal-header">
+        <div class="modal-title" style="color:#40916C;">Protect the Planet</div>
+        <div class="modal-close" onclick="closeModal('modal-val-planet')">✕</div>
+      </div>
+      <div class="modal-body">
+        <div class="val-modal-hero">
+          <div class="val-modal-icon" style="background:#E8F7F0;">🌍</div>
+          <div class="val-modal-name">Protect the Planet</div>
+          <div class="val-modal-desc">For people who want to fight climate change, reduce their environmental footprint, and protect biodiversity through everyday choices.</div>
+        </div>
+        <div class="val-modal-behav-hdr">PROMOTED BEHAVIORS</div>
+        <div class="val-modal-tags">
+          <span class="val-tag" style="background:#E8F7F0;color:#2d6a4f;">Public transport</span>
+          <span class="val-tag" style="background:#E8F7F0;color:#2d6a4f;">EV charging</span>
+          <span class="val-tag" style="background:#E8F7F0;color:#2d6a4f;">Second-hand shopping</span>
+          <span class="val-tag" style="background:#E8F7F0;color:#2d6a4f;">Repairing instead of replacing</span>
+          <span class="val-tag" style="background:#E8F7F0;color:#2d6a4f;">Organic &amp; local food</span>
+          <span class="val-tag" style="background:#E8F7F0;color:#2d6a4f;">Cycling</span>
+          <span class="val-tag" style="background:#E8F7F0;color:#2d6a4f;">Shared mobility</span>
+          <span class="val-tag" style="background:#E8F7F0;color:#2d6a4f;">Eco-certified products</span>
+        </div>
+      </div>
+      <button class="val-select-btn" style="background:#40916C;" onclick="selectValue('planet'); goTo('screen-dashboard'); closeModal('modal-val-planet')">Select this value</button>
+    </div>
+  </div>
+
+  <!-- Rights -->
+  <div class="modal-overlay" id="modal-val-rights" onclick="handleOverlayClick(event, 'modal-val-rights')">
+    <div class="modal-sheet">
+      <div class="modal-drag"></div>
+      <div class="modal-header">
+        <div class="modal-title" style="color:#7B68C4;">Promote Human Rights</div>
+        <div class="modal-close" onclick="closeModal('modal-val-rights')">✕</div>
+      </div>
+      <div class="modal-body">
+        <div class="val-modal-hero">
+          <div class="val-modal-icon" style="background:#F0ECF9;">🤝</div>
+          <div class="val-modal-name">Promote Human Rights</div>
+          <div class="val-modal-desc">For people who believe their money should stand for human dignity. Supporting fair labor, fighting exploitation, and contributing to peace and justice.</div>
+        </div>
+        <div class="val-modal-behav-hdr">PROMOTED BEHAVIORS</div>
+        <div class="val-modal-tags">
+          <span class="val-tag" style="background:#F0ECF9;color:#5b4a9e;">Donating to NGOs</span>
+          <span class="val-tag" style="background:#F0ECF9;color:#5b4a9e;">Buying B Corp brands</span>
+          <span class="val-tag" style="background:#F0ECF9;color:#5b4a9e;">Fair Trade purchases</span>
+          <span class="val-tag" style="background:#F0ECF9;color:#5b4a9e;">Ethical fashion</span>
+          <span class="val-tag" style="background:#F0ECF9;color:#5b4a9e;">Avoiding flagged merchants</span>
+          <span class="val-tag" style="background:#F0ECF9;color:#5b4a9e;">Supporting cooperatives</span>
+        </div>
+      </div>
+      <button class="val-select-btn" style="background:#7B68C4;" onclick="selectValue('rights'); goTo('screen-dashboard'); closeModal('modal-val-rights')">Select this value</button>
+    </div>
+  </div>
+
+  <!-- Local -->
+  <div class="modal-overlay" id="modal-val-local" onclick="handleOverlayClick(event, 'modal-val-local')">
+    <div class="modal-sheet">
+      <div class="modal-drag"></div>
+      <div class="modal-header">
+        <div class="modal-title" style="color:#D4894E;">Support Local Economy</div>
+        <div class="modal-close" onclick="closeModal('modal-val-local')">✕</div>
+      </div>
+      <div class="modal-body">
+        <div class="val-modal-hero">
+          <div class="val-modal-icon" style="background:#FFF3EB;">🏪</div>
+          <div class="val-modal-name">Support Local Economy</div>
+          <div class="val-modal-desc">For people who want their money to stay in their community. Supporting the small shop, the family restaurant, the independent craftsman.</div>
+        </div>
+        <div class="val-modal-behav-hdr">PROMOTED BEHAVIORS</div>
+        <div class="val-modal-tags">
+          <span class="val-tag" style="background:#FFF3EB;color:#a3622a;">Independent restaurants &amp; cafes</span>
+          <span class="val-tag" style="background:#FFF3EB;color:#a3622a;">Farmers markets</span>
+          <span class="val-tag" style="background:#FFF3EB;color:#a3622a;">Small neighborhood shops</span>
+          <span class="val-tag" style="background:#FFF3EB;color:#a3622a;">Local artisans &amp; craftsmen</span>
+          <span class="val-tag" style="background:#FFF3EB;color:#a3622a;">Non-chain retail</span>
+        </div>
+      </div>
+      <button class="val-select-btn" style="background:#D4894E;" onclick="selectValue('local'); goTo('screen-dashboard'); closeModal('modal-val-local')">Select this value</button>
+    </div>
+  </div>
+
+  <!-- Culture -->
+  <div class="modal-overlay" id="modal-val-culture" onclick="handleOverlayClick(event, 'modal-val-culture')">
+    <div class="modal-sheet">
+      <div class="modal-drag"></div>
+      <div class="modal-header">
+        <div class="modal-title" style="color:#4A8DBF;">Promote Culture &amp; Knowledge</div>
+        <div class="modal-close" onclick="closeModal('modal-val-culture')">✕</div>
+      </div>
+      <div class="modal-body">
+        <div class="val-modal-hero">
+          <div class="val-modal-icon" style="background:#EBF3FA;">📚</div>
+          <div class="val-modal-name">Promote Culture &amp; Knowledge</div>
+          <div class="val-modal-desc">For people who invest in ideas, creativity, and learning. Every ticket, subscription, and purchase is a vote for curiosity and creativity.</div>
+        </div>
+        <div class="val-modal-behav-hdr">PROMOTED BEHAVIORS</div>
+        <div class="val-modal-tags">
+          <span class="val-tag" style="background:#EBF3FA;color:#2e6b9e;">Museums &amp; galleries</span>
+          <span class="val-tag" style="background:#EBF3FA;color:#2e6b9e;">Theater &amp; performing arts</span>
+          <span class="val-tag" style="background:#EBF3FA;color:#2e6b9e;">Buying books</span>
+          <span class="val-tag" style="background:#EBF3FA;color:#2e6b9e;">Online courses</span>
+          <span class="val-tag" style="background:#EBF3FA;color:#2e6b9e;">Music &amp; instruments</span>
+          <span class="val-tag" style="background:#EBF3FA;color:#2e6b9e;">Creative workshops</span>
+        </div>
+      </div>
+      <button class="val-select-btn" style="background:#4A8DBF;" onclick="selectValue('culture'); goTo('screen-dashboard'); closeModal('modal-val-culture')">Select this value</button>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       MODAL 1: TRANSACTION INSIGHT DETAIL
+       ===================================================== -->
+  <div class="modal-overlay" id="modal-insight" onclick="handleOverlayClick(event, 'modal-insight')">
+    <div class="modal-sheet">
+      <div class="modal-drag"></div>
+      <div class="modal-header">
+        <div class="modal-title" id="insight-modal-title">Insight Detail</div>
+        <div class="modal-close" onclick="closeModal('modal-insight')">✕</div>
+      </div>
+      <div class="modal-body">
+        <div class="insight-modal-icon" id="insight-modal-icon" style="background:#dcfce7;">✓</div>
+        <div class="insight-modal-text" id="insight-modal-text"></div>
+      </div>
+      <button class="modal-got-it" onclick="closeModal('modal-insight')">Got it</button>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       MODAL 2: SCORE METHODOLOGY
+       ===================================================== -->
+  <div class="modal-overlay" id="modal-methodology" onclick="handleOverlayClick(event, 'modal-methodology')">
+    <div class="modal-sheet">
+      <div class="modal-drag"></div>
+      <div class="modal-header">
+        <div class="modal-title">How your score works</div>
+        <div class="modal-close" onclick="closeModal('modal-methodology')">✕</div>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:13px;color:#6b7280;line-height:1.5;margin-bottom:4px;">Your Human Rights Impact Score (0–100) measures how consistently your spending promotes human dignity and fair labor.</p>
+
+        <div class="meth-section-title">WHAT EARNS POINTS</div>
+        <div class="meth-row"><div class="meth-check">✅</div><div class="meth-label">Purchases at <strong>Fair Trade certified</strong> merchants</div></div>
+        <div class="meth-row"><div class="meth-check">✅</div><div class="meth-label">Shopping at <strong>B Corp certified</strong> brands</div></div>
+        <div class="meth-row"><div class="meth-check">✅</div><div class="meth-label">Donations to <strong>human rights organizations</strong> (NGOs)</div></div>
+        <div class="meth-row"><div class="meth-check">✅</div><div class="meth-label">Purchases at merchants with <strong>SA8000 certification</strong></div></div>
+        <div class="meth-row"><div class="meth-check">✅</div><div class="meth-label">Ethical spend <strong>above your community average</strong></div></div>
+
+        <div class="meth-section-title" style="margin-top:16px;">WHAT TO WATCH OUT FOR</div>
+        <div class="meth-row"><div class="meth-check">⚠️</div><div class="meth-label">Merchants with <strong>open labor violation flags</strong> are negative signals</div></div>
+        <div class="meth-row"><div class="meth-check">⚠️</div><div class="meth-label">Brands under <strong>active supply chain audits</strong> may reduce your score</div></div>
+
+        <div class="meth-section-title" style="margin-top:16px;">SCORE TIERS</div>
+        <div class="tier-row" style="background:#f9fafb;">
+          <div class="tier-pill t-start">Getting Started</div>
+          <div class="tier-desc">0 – 40 pts &nbsp;·&nbsp; Begin your journey</div>
+        </div>
+        <div class="tier-row" style="background:#fefdf5;">
+          <div class="tier-pill t-bronze">Bronze</div>
+          <div class="tier-desc">41 – 70 pts &nbsp;·&nbsp; Growing awareness</div>
+        </div>
+        <div class="tier-row" style="background:#f8fafc;">
+          <div class="tier-pill t-silver">Silver</div>
+          <div class="tier-desc">71 – 85 pts &nbsp;·&nbsp; Consistent impact</div>
+        </div>
+        <div class="tier-row" style="background:#fefce8;">
+          <div class="tier-pill t-gold">Gold ⭐</div>
+          <div class="tier-desc">86 – 100 pts &nbsp;·&nbsp; Values champion</div>
+        </div>
+        <p style="font-size:11px;color:#9ca3af;margin-top:12px;line-height:1.5;">Scores are recalculated monthly. Data provided by Clarity AI based on merchant-level sustainability analysis.</p>
+      </div>
+      <button class="modal-got-it" onclick="closeModal('modal-methodology')">Got it</button>
+    </div>
+  </div>
+
+  <!-- =====================================================
+       MODAL 3: CONTRIBUTING TRANSACTIONS
+       ===================================================== -->
+  <div class="modal-overlay" id="modal-transactions" onclick="handleOverlayClick(event, 'modal-transactions')">
+    <div class="modal-sheet">
+      <div class="modal-drag"></div>
+      <div class="modal-header">
+        <div class="modal-title">Transactions contributing to your score</div>
+        <div class="modal-close" onclick="closeModal('modal-transactions')">✕</div>
+      </div>
+      <div class="modal-body">
+        <div class="txn-summary-pill">
+          <span>🏆</span> 7 transactions contributed 43 pts this month
+        </div>
+        <div class="modal-txn-row">
+          <div class="mtxn-icon">🌿</div>
+          <div class="mtxn-info"><div class="mtxn-name">People Tree</div><div class="mtxn-cat">Fair Trade Fashion</div></div>
+          <div class="mtxn-pts pts-pos">+5 pts</div>
+        </div>
+        <div class="modal-txn-row">
+          <div class="mtxn-icon">🛒</div>
+          <div class="mtxn-info"><div class="mtxn-name">Carrefour</div><div class="mtxn-cat">Supermarket</div></div>
+          <div class="mtxn-pts pts-none">No pts</div>
+        </div>
+        <div class="modal-txn-row">
+          <div class="mtxn-icon">🤝</div>
+          <div class="mtxn-info"><div class="mtxn-name">Oxfam Shop</div><div class="mtxn-cat">Fair Trade Retail</div></div>
+          <div class="mtxn-pts pts-pos">+5 pts</div>
+        </div>
+        <div class="modal-txn-row">
+          <div class="mtxn-icon">🇺🇳</div>
+          <div class="mtxn-info"><div class="mtxn-name">UNHCR Donation</div><div class="mtxn-cat">Human Rights NGO</div></div>
+          <div class="mtxn-pts pts-pos">+10 pts</div>
+        </div>
+        <div class="modal-txn-row">
+          <div class="mtxn-icon">👕</div>
+          <div class="mtxn-info"><div class="mtxn-name">Shein</div><div class="mtxn-cat">Fast Fashion</div></div>
+          <div class="mtxn-pts pts-none">No pts</div>
+        </div>
+        <div class="modal-txn-row">
+          <div class="mtxn-icon">🏔️</div>
+          <div class="mtxn-info"><div class="mtxn-name">Patagonia</div><div class="mtxn-cat">B Corp Certified</div></div>
+          <div class="mtxn-pts pts-pos">+8 pts</div>
+        </div>
+        <div class="modal-txn-row">
+          <div class="mtxn-icon">✊</div>
+          <div class="mtxn-info"><div class="mtxn-name">Amnesty International</div><div class="mtxn-cat">Human Rights NGO</div></div>
+          <div class="mtxn-pts pts-pos">+10 pts</div>
+        </div>
+        <div class="modal-txn-row">
+          <div class="mtxn-icon">👗</div>
+          <div class="mtxn-info"><div class="mtxn-name">Zara</div><div class="mtxn-cat">Fashion — labor flag ⚠️</div></div>
+          <div class="mtxn-pts pts-none">No pts</div>
+        </div>
+        <p style="font-size:11px;color:#9ca3af;margin-top:14px;line-height:1.5;">Only transactions at certified or verified merchants generate points. Data updated daily by Clarity AI.</p>
+      </div>
+      <button class="modal-got-it" onclick="closeModal('modal-transactions')">Got it</button>
+    </div>
+  </div>
+
+</div><!-- /phone -->
+
+<script>
+  // ---- SCREEN NAVIGATION ----
+  let currentScreen = 'screen-home';
+
+  function goTo(id) {
+    const from = document.getElementById(currentScreen);
+    const to   = document.getElementById(id);
+    if (!to || id === currentScreen) return;
+
+    from.classList.add('exit-left');
+    to.classList.add('active');
+
+    setTimeout(() => {
+      from.classList.remove('active', 'exit-left');
+    }, 260);
+
+    currentScreen = id;
+
+    // Reset scroll
+    const scroll = to.querySelector('.scroll-body');
+    if (scroll) scroll.scrollTop = 0;
+    const dashScroll = document.getElementById('dash-scroll');
+    if (id === 'screen-dashboard' && dashScroll) dashScroll.scrollTop = 0;
+  }
+
+  // ---- VALUE SELECTION ----
+  let selectedValue = 'rights';
+
+  function selectValue(val) {
+    document.querySelectorAll('.value-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('vc-' + val).classList.add('selected');
+    selectedValue = val;
+    document.getElementById('continue-btn').className = 'continue-btn active';
+  }
+
+  // ---- DASHBOARD TABS ----
+  function switchDashTab(tab, el) {
+    document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.sub-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('sub-' + tab).classList.add('active');
+    document.getElementById('dash-scroll').scrollTop = 0;
+  }
+
+  // ---- MERCHANT TABS ----
+  document.querySelectorAll('.m-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // ---- MYTH BUSTER ----
+  const myths = [
+    { text: '"Made in Italy" (or UK, USA, France) means fair labor conditions.', bust: 'Country-of-origin labels only indicate where final assembly happened. Many garments use components from countries with minimal labor protections — with no transparency required.' },
+    { text: 'Buying from big brands means workers are better protected.', bust: 'Large brands often subcontract to third parties with little oversight. Labor violations are more common in tier-2 and tier-3 suppliers — and brands rarely audit that far.' },
+    { text: '"Ethical fashion" always costs more.', bust: 'Price is not a proxy for ethics. Some mid-range brands pay living wages while some luxury labels cut corners. Certifications like Fair Trade, SA8000, and B Corp are better signals.' },
+    { text: 'Donating to charities compensates for buying from unethical brands.', bust: 'Charitable giving is valuable, but does not offset systemic harm from exploitative supply chains. Reducing demand from harmful brands is more impactful than offsetting it.' }
+  ];
+  let mythIdx = 0;
+  let mythBusted = false;
+
+  function bustMyth() {
+    const r = document.getElementById('myth-reveal');
+    const b = document.querySelector('.bust-btn');
+    mythBusted = !mythBusted;
+    r.classList.toggle('show', mythBusted);
+    b.textContent = mythBusted ? 'Hide explanation' : 'Bust it';
+  }
+
+  function changeMyth(dir) {
+    mythIdx = (mythIdx + dir + myths.length) % myths.length;
+    document.getElementById('myth-text').textContent = myths[mythIdx].text;
+    document.getElementById('myth-reveal').textContent = myths[mythIdx].bust;
+    document.getElementById('myth-reveal').classList.remove('show');
+    document.getElementById('myth-count').textContent = (mythIdx + 1) + ' / ' + myths.length;
+    document.querySelector('.bust-btn').textContent = 'Bust it';
+    mythBusted = false;
+  }
+
+  // ---- VALUE DETAIL MODALS ----
+  function openValueModal(val) {
+    openModal('modal-val-' + val);
+  }
+
+  // ---- DRAG-TO-SCROLL (mouse) ----
+  function addDragScroll(el) {
+    let isDown = false, startX, scrollLeft;
+    el.addEventListener('mousedown', e => {
+      isDown = true; el.classList.add('dragging');
+      startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft;
+    });
+    el.addEventListener('mouseleave', () => { isDown = false; el.classList.remove('dragging'); });
+    el.addEventListener('mouseup', () => { isDown = false; el.classList.remove('dragging'); });
+    el.addEventListener('mousemove', e => {
+      if (!isDown) return; e.preventDefault();
+      const x = e.pageX - el.offsetLeft;
+      el.scrollLeft = scrollLeft - (x - startX);
+    });
+  }
+  document.querySelectorAll('.articles-scroll, .merchant-scroll, .accounts-carousel').forEach(addDragScroll);
+
+  // ---- MODALS ----
+  function openModal(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.add('open'); }
+  }
+  function closeModal(id) {
+    const el = document.getElementById(id);
+    if (el) { el.classList.remove('open'); }
+  }
+  function handleOverlayClick(e, id) {
+    if (e.target === e.currentTarget) closeModal(id);
+  }
+
+  // ---- INSIGHT MODAL DATA ----
+  const insightData = [
+    {
+      title: 'Fair Trade Purchases',
+      icon: '✓', bg: '#dcfce7',
+      text: 'Out of your 25 purchases this month, 5 were at Fair Trade certified merchants (20%). Top merchants: Oxfam Shop, People Tree, and Equal Exchange. Keep it up — Fair Trade purchases are one of the highest-scoring actions.'
+    },
+    {
+      title: 'Ethical Spending vs. Average',
+      icon: '↗', bg: '#ccfbf1',
+      text: 'Your ethical spend share is 34% of total spending this month, compared to the community average of 22%. You\'re performing in the top 15% of your community. Ethical spend includes Fair Trade, B Corp, and NGO donations.'
+    },
+    {
+      title: 'Merchants with Labor Flags',
+      icon: '⚠', bg: '#fef9c3',
+      text: '2 merchants you shopped at this month have open labor concern flags: Zara (supply chain audit pending) and Shein (ongoing labor investigation). Consider alternatives like People Tree or The Giving Movement for similar products.'
+    },
+    {
+      title: 'B Corp Certified Brands',
+      icon: '★', bg: '#ede9fe',
+      text: '3 of your regular brands are B Corp certified: Patagonia, The Body Shop, and The Giving Movement. B Corp certification requires verified high standards of social and environmental performance, accountability, and transparency.'
+    },
+    {
+      title: 'Donations to Human Rights Orgs',
+      icon: '♥', bg: '#fce7f3',
+      text: 'You donated to 2 human rights organizations this quarter: Amnesty International (AED 50) and UNHCR (AED 30). That\'s AED 80 in direct impact — and each donation also earns you points toward your score.'
+    }
+  ];
+
+  function openInsightModal(idx) {
+    const data = insightData[idx];
+    document.getElementById('insight-modal-title').textContent = data.title;
+    document.getElementById('insight-modal-icon').textContent = data.icon;
+    document.getElementById('insight-modal-icon').style.background = data.bg;
+    document.getElementById('insight-modal-text').textContent = data.text;
+    openModal('modal-insight');
+  }
+</script>
+</body>
+</html>
