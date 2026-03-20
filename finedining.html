@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Lifestyle Communities — Fine Dining Club</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: #d1d5db;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 32px 16px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* PHONE SHELL */
+.phone {
+  width: 390px;
+  height: 844px;
+  background: #f2f2f7;
+  border-radius: 44px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.3), 0 0 0 10px #1a1a1a, 0 0 0 12px #3a3a3a;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+/* STATUS BAR */
+.status-bar {
+  background: inherit;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 24px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #111;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 5;
+}
+.status-bar.dark { color: #fff; }
+.status-icons { display: flex; gap: 5px; align-items: center; }
+
+/* SCREEN WRAPPER */
+.screen-wrapper {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* INDIVIDUAL SCREENS */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(30px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+.screen.active {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateX(0);
+}
+.screen.exit-left {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+
+/* SCROLLABLE BODY */
+.scroll-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.scroll-body::-webkit-scrollbar { display: none; }
+
+/* =========================================================
+   SHARED COMPONENTS
+   ========================================================= */
+
+.nav-bar {
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px 12px;
+  border-bottom: 1px solid #f0f0f0;
+  flex-shrink: 0;
+  z-index: 5;
+}
+.nav-title { font-size: 16px; font-weight: 600; color: #1a1a2e; letter-spacing: -0.2px; }
+.icon-btn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: #1a1a2e; border-radius: 50%;
+  transition: background 0.15s;
+}
+.icon-btn:active { background: #f3f4f6; }
+
+.tab-bar {
+  background: #fff;
+  border-top: 1px solid #e8e8e8;
+  display: flex;
+  flex-shrink: 0;
+}
+.tab-item {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px 0 18px;
+  cursor: pointer; gap: 4px;
+  color: #9ca3af; font-size: 11px; font-weight: 500;
+  transition: color 0.2s;
+}
+.tab-item.active { color: #c9a96e; }
+.tab-item svg { width: 22px; height: 22px; }
+
+.section-header { padding: 20px 16px 8px; }
+.section-header h2 { font-size: 18px; font-weight: 700; color: #1a1a2e; margin-bottom: 3px; }
+.section-header p { font-size: 13px; color: #6b7280; }
+
+.see-all { text-align: center; padding: 10px 0 4px;
+  font-size: 13px; color: #c9a96e; font-weight: 500; cursor: pointer; }
+
+.page-footer { padding: 24px 16px 12px; text-align: center; }
+.page-footer p { font-size: 12px; color: #9ca3af; line-height: 1.8; }
+.page-footer a { color: #6b7280; text-decoration: underline; }
+
+.btn-primary {
+  background: #1a1a2e; color: #fff;
+  border: none; border-radius: 99px;
+  padding: 16px 24px; font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s, transform 0.1s;
+  text-align: center;
+}
+.btn-primary:active { transform: scale(0.97); }
+.btn-ghost {
+  background: transparent; color: #6b7280;
+  border: none; font-size: 15px; font-weight: 500;
+  cursor: pointer; padding: 8px;
+}
+
+/* SUB-SCREEN SWITCHING */
+.sub-screen { display: none; }
+.sub-screen.active { display: block; }
+
+/* CAROUSEL SHARED */
+.h-scroll {
+  display: flex; gap: 12px;
+  overflow-x: auto; padding: 0 16px 4px;
+  scroll-snap-type: x mandatory;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+.h-scroll.dragging { cursor: grabbing; }
+.h-scroll::-webkit-scrollbar { display: none; }
+
+/* =========================================================
+   SCREEN 1 — HOME BANKING
+   ========================================================= */
+#screen-home { background: #f2f2f7; }
+#screen-home .status-bar { background: #fff; }
+
+.home-header {
+  background: #fff;
+  padding: 12px 20px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.home-welcome { font-size: 22px; font-weight: 700; color: #1a1a2e; }
+.home-header-icons { display: flex; gap: 6px; }
+
+.quick-actions {
+  background: #fff;
+  display: flex; padding: 8px 16px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 8px;
+}
+.qa-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer;
+}
+.qa-icon {
+  width: 52px; height: 52px; border-radius: 50%;
+  background: #f3f4f6; display: flex; align-items: center; justify-content: center;
+}
+.qa-icon svg { width: 22px; height: 22px; color: #374151; }
+.qa-label { font-size: 12px; color: #374151; font-weight: 500; }
+
+/* COMMUNITIES SECTION ON HOME */
+.communities-home-section {
+  margin: 16px 16px 0; padding: 0;
+}
+.communities-home-title { font-size: 18px; font-weight: 800; color: #1a1a2e; margin-bottom: 3px; }
+.communities-home-sub { font-size: 13px; color: #6b7280; margin-bottom: 12px; }
+
+.community-card {
+  min-width: 250px; max-width: 250px;
+  border-radius: 16px; padding: 20px;
+  flex-shrink: 0; scroll-snap-align: start;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform 0.15s;
+  user-select: none;
+}
+.community-card:active { transform: scale(0.97); }
+.cc-fine { background: linear-gradient(135deg, #1a1a2e 0%, #2d2b4e 50%, #3d2e1e 100%); }
+.cc-padel { background: linear-gradient(135deg, #0d3b3e 0%, #1a5c4e 50%, #2a7a5e 100%); }
+.cc-parent { background: linear-gradient(135deg, #5c3a1e 0%, #a85c2e 50%, #d4894e 100%); }
+.cc-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: rgba(255,255,255,0.15);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.cc-icon svg { width: 24px; height: 24px; color: #fff; }
+.cc-name { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.cc-members { font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 14px; }
+.cc-explore {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 99px; padding: 7px 16px;
+  font-size: 13px; font-weight: 600; color: #fff;
+}
+
+/* BALANCE */
+.balance-section { padding: 8px 20px 12px; background: #fff; margin-top: 8px; }
+.balance-label { font-size: 13px; color: #6b7280; margin-bottom: 4px; }
+.balance-amount { font-size: 34px; font-weight: 800; color: #1a1a2e; letter-spacing: -1px; }
+
+/* ACCOUNTS CAROUSEL */
+.accounts-carousel {
+  display: flex; gap: 10px;
+  overflow-x: auto; padding: 12px 16px 16px;
+  background: #fff;
+  scroll-snap-type: x mandatory;
+  cursor: grab;
+  -webkit-overflow-scrolling: touch;
+}
+.accounts-carousel.dragging { cursor: grabbing; }
+.accounts-carousel::-webkit-scrollbar { display: none; }
+.account-card {
+  background: #f9fafb; border-radius: 14px;
+  padding: 14px 16px; min-width: 150px;
+  scroll-snap-align: start; border: 1px solid #f0f0f0;
+}
+.account-num { font-size: 12px; color: #9ca3af; margin-bottom: 6px; }
+.account-balance { font-size: 20px; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
+.account-type { font-size: 11px; color: #9ca3af; }
+
+/* TRANSACTIONS */
+.transactions-section { background: #fff; margin-top: 8px; }
+.txn-header { padding: 16px 20px 8px; font-size: 18px; font-weight: 700; color: #1a1a2e; }
+.txn-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f9fafb;
+}
+.txn-item:last-child { border-bottom: none; }
+.txn-icon {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: #f3f4f6; display: flex; align-items: center;
+  justify-content: center; flex-shrink: 0;
+}
+.txn-icon svg { width: 20px; height: 20px; color: #6b7280; }
+.txn-info { flex: 1; }
+.txn-name { font-size: 14px; font-weight: 600; color: #1a1a2e; }
+.txn-date { font-size: 12px; color: #9ca3af; margin-top: 1px; }
+.txn-amount { font-size: 15px; font-weight: 600; color: #1a1a2e; }
+
+/* =========================================================
+   SCREEN 2 — COMMUNITY WELCOME
+   ========================================================= */
+#screen-welcome {
+  background: linear-gradient(180deg, #1a1a2e 0%, #2d2b4e 40%, #3d2e1e 100%);
+}
+#screen-welcome .status-bar { background: transparent; color: #fff; }
+
+.welcome-body {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 24px 28px; text-align: center;
+}
+.welcome-icon {
+  width: 88px; height: 88px; border-radius: 50%;
+  background: rgba(201,169,110,0.2);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 24px; border: 2px solid rgba(201,169,110,0.4);
+}
+.welcome-icon svg { width: 40px; height: 40px; color: #c9a96e; }
+.welcome-title {
+  font-size: 24px; font-weight: 800; color: #fff;
+  line-height: 1.2; margin-bottom: 12px;
+}
+.welcome-subtitle {
+  font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.6;
+  margin-bottom: 28px;
+}
+
+.welcome-perks { text-align: left; width: 100%; margin-bottom: 20px; }
+.perk-row {
+  display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px;
+}
+.perk-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: rgba(201,169,110,0.15);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.perk-icon svg { width: 18px; height: 18px; color: #c9a96e; }
+.perk-text { font-size: 13px; color: rgba(255,255,255,0.85); line-height: 1.5; padding-top: 2px; }
+.perk-text strong { color: #fff; }
+
+.welcome-actions {
+  padding: 0 24px 36px; width: 100%;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.btn-gold {
+  background: linear-gradient(135deg, #c9a96e 0%, #e0c992 100%); color: #1a1a2e;
+  border: none; border-radius: 99px;
+  padding: 16px 24px; font-size: 16px; font-weight: 700;
+  cursor: pointer; transition: transform 0.1s; text-align: center;
+}
+.btn-gold:active { transform: scale(0.97); }
+
+/* =========================================================
+   SCREEN 3 — DASHBOARD
+   ========================================================= */
+#screen-dashboard { background: #f2f2f7; }
+
+/* --- MY CLUB TAB --- */
+
+/* DINING JOURNEY (gamification) */
+.journey-card {
+  background: #fff; margin: 16px 16px 0; border-radius: 16px;
+  padding: 20px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.journey-title { font-size: 16px; font-weight: 700; color: #1a1a2e; margin-bottom: 14px; }
+.journey-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.j-stat {
+  text-align: center; background: #faf8f4; border-radius: 12px; padding: 12px 6px;
+}
+.j-stat-val { font-size: 22px; font-weight: 800; color: #c9a96e; }
+.j-stat-label { font-size: 10px; color: #6b7280; font-weight: 500; margin-top: 2px; line-height: 1.3; }
+
+.badges-row { display: flex; gap: 10px; }
+.badge-item {
+  flex: 1; display: flex; align-items: center; gap: 10px;
+  background: #f9fafb; border-radius: 12px; padding: 10px 12px;
+}
+.badge-item.locked { opacity: 0.5; }
+.badge-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  font-size: 16px;
+}
+.badge-info { min-width: 0; }
+.badge-name { font-size: 12px; font-weight: 700; color: #1a1a2e; }
+.badge-desc { font-size: 10px; color: #9ca3af; }
+
+/* FEATURED BENEFIT */
+.featured-benefit {
+  margin: 12px 16px 0; border-radius: 16px; overflow: hidden;
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d2b4e 100%);
+  padding: 18px 18px 16px;
+  cursor: pointer; transition: transform 0.15s; position: relative;
+}
+.featured-benefit:active { transform: scale(0.98); }
+.fb-label {
+  font-size: 10px; font-weight: 800; color: #c9a96e;
+  letter-spacing: 0.8px; margin-bottom: 8px;
+}
+.fb-title { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.fb-sub { font-size: 13px; color: rgba(255,255,255,0.65); margin-bottom: 12px; }
+.fb-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600; color: #c9a96e;
+}
+
+/* MERCHANT CARDS (restaurants) */
+.restaurant-card {
+  background: #fff; border-radius: 14px; padding: 16px;
+  min-width: 200px; max-width: 200px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  flex-shrink: 0; scroll-snap-align: start;
+  user-select: none;
+}
+.r-logo-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.r-logo {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.r-name { font-size: 14px; font-weight: 700; color: #1a1a2e; }
+.r-cuisine { font-size: 11px; color: #9ca3af; }
+.r-desc { font-size: 12px; color: #6b7280; line-height: 1.5; margin-bottom: 10px; }
+.r-footer { display: flex; align-items: center; justify-content: space-between; }
+.r-members { font-size: 11px; color: #c9a96e; font-weight: 500; }
+.r-actions { display: flex; gap: 6px; }
+.r-action {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 1px solid #e5e7eb; display: flex; align-items: center;
+  justify-content: center; cursor: pointer; font-size: 12px;
+}
+
+/* MERCHANT TABS */
+.merchant-tabs { display: flex; border-bottom: 1px solid #e5e7eb; margin: 0 16px 12px; }
+.m-tab {
+  padding: 8px 16px; font-size: 14px; font-weight: 500; color: #9ca3af;
+  cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.m-tab.active { color: #c9a96e; border-bottom-color: #c9a96e; }
+
+/* QUICK READS */
+.read-card {
+  background: #fff; border-radius: 14px; overflow: hidden;
+  min-width: 210px; max-width: 210px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  flex-shrink: 0; scroll-snap-align: start;
+  user-select: none;
+}
+.read-img {
+  width: 100%; height: 100px;
+  display: flex; align-items: center; justify-content: center;
+}
+.ri-1 { background: #edeae5; }
+.ri-2 { background: #e5eceb; }
+.ri-3 { background: #e8e6ee; }
+.read-img svg { width: 36px; height: 36px; opacity: 0.35; }
+.read-body { padding: 12px 14px 14px; }
+.read-title { font-size: 13px; font-weight: 700; color: #1a1a2e; line-height: 1.4; margin-bottom: 4px; }
+.read-meta { font-size: 11px; color: #9ca3af; }
+
+/* --- BENEFITS TAB --- */
+
+.reward-card {
+  background: #fff; margin: 0 16px 10px; border-radius: 14px;
+  padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex; align-items: flex-start; gap: 14px;
+}
+.reward-card.locked { opacity: 0.5; }
+.reward-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.reward-icon svg { width: 22px; height: 22px; }
+.r-gold { background: #fef3c7; }
+.r-amber { background: #fff7ed; }
+.r-gray { background: #f3f4f6; }
+.reward-body { flex: 1; min-width: 0; }
+.reward-title { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
+.reward-subtitle { font-size: 12px; color: #6b7280; margin-bottom: 8px; line-height: 1.4; }
+.reward-status {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;
+}
+.rs-active { background: #fef3c7; color: #92400e; }
+.rs-locked { background: #f3f4f6; color: #9ca3af; }
+.reward-earned { font-size: 12px; color: #6b7280; margin-top: 6px; }
+.reward-earned strong { color: #c9a96e; }
+
+.benefit-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
+.benefit-card {
+  background: #fff; border-radius: 14px; padding: 14px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06); text-align: center;
+  cursor: pointer; transition: transform 0.15s;
+}
+.benefit-card:active { transform: scale(0.97); }
+.bp-logo {
+  width: 48px; height: 48px; border-radius: 14px; margin: 0 auto 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.bp-name { font-size: 13px; font-weight: 700; color: #1a1a2e; margin-bottom: 4px; }
+.bp-discount {
+  display: inline-block; background: #fef3c7; color: #92400e;
+  font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; margin-bottom: 4px;
+}
+.bp-type { font-size: 11px; color: #9ca3af; }
+
+/* EXCLUSIVE EXPERIENCES */
+.exp-card {
+  background: #fff; margin: 0 16px 10px; border-radius: 14px;
+  padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  display: flex; align-items: flex-start; gap: 14px;
+  cursor: pointer; transition: transform 0.15s;
+}
+.exp-card:active { transform: scale(0.97); }
+.exp-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  background: linear-gradient(135deg, #1a1a2e, #2d2b4e);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 20px;
+}
+.exp-body { flex: 1; }
+.exp-title { font-size: 14px; font-weight: 700; color: #1a1a2e; margin-bottom: 2px; }
+.exp-desc { font-size: 12px; color: #6b7280; line-height: 1.4; margin-bottom: 6px; }
+.exp-badge {
+  display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 8px;
+  border-radius: 99px; background: #ede9fe; color: #6d28d9;
+}
+
+/* --- COMMUNITY TAB --- */
+
+.comm-hero {
+  margin: 16px 16px 0; border-radius: 16px; overflow: hidden;
+  background: linear-gradient(135deg, #1a1a2e 0%, #2d2b4e 50%, #3d2e1e 100%);
+  padding: 20px; color: #fff; position: relative;
+}
+.comm-hero-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(201,169,110,0.25); border-radius: 99px;
+  padding: 4px 10px; font-size: 11px; font-weight: 700; margin-bottom: 12px;
+  color: #c9a96e;
+}
+.comm-hero-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+.comm-hero-sub { font-size: 13px; opacity: 0.8; margin-bottom: 14px; }
+.comm-hero-joined {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 99px; padding: 6px 14px; font-size: 12px; font-weight: 600;
+}
+.comm-hero-icon { position: absolute; top: 18px; right: 18px; font-size: 22px; opacity: 0.6; }
+
+.comm-stats-row {
+  display: flex; margin: 12px 16px 0; gap: 8px;
+}
+.comm-stat-card {
+  flex: 1; background: #fff; border-radius: 12px; padding: 14px 8px;
+  text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.cs-val { font-size: 16px; font-weight: 800; color: #1a1a2e; line-height: 1.2; }
+.cs-label { font-size: 10px; color: #9ca3af; font-weight: 500; margin-top: 3px; line-height: 1.3; }
+
+.challenge-card {
+  background: #fff; margin: 12px 16px 0; border-radius: 14px;
+  padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.ch-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.ch-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.ch-active {
+  background: #fef3c7; color: #92400e; font-size: 11px; font-weight: 700;
+  padding: 3px 10px; border-radius: 99px;
+}
+.ch-desc { font-size: 13px; color: #6b7280; margin-bottom: 14px; line-height: 1.4; }
+.ch-progress-label {
+  font-size: 12px; color: #374151; font-weight: 600; margin-bottom: 5px;
+  display: flex; justify-content: space-between;
+}
+.ch-track { background: #e5e7eb; border-radius: 99px; height: 7px; margin-bottom: 12px; overflow: hidden; }
+.ch-fill { height: 100%; border-radius: 99px; }
+.ch-fill-comm { background: linear-gradient(90deg, #c9a96e, #e0c992); }
+.ch-fill-you { background: linear-gradient(90deg, #0f9b8e, #14b8a6); }
+.ch-reward {
+  display: flex; align-items: center; gap: 8px;
+  background: #faf8f4; border-radius: 10px; padding: 10px 12px;
+}
+.ch-reward-text { font-size: 13px; color: #374151; font-weight: 500; flex: 1; }
+.ch-reward-badge {
+  background: #c9a96e; color: #fff; font-size: 12px; font-weight: 700;
+  padding: 3px 10px; border-radius: 99px;
+}
+
+.standing-card {
+  background: #fff; margin: 12px 16px 0; border-radius: 14px;
+  padding: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.standing-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.standing-title { font-size: 15px; font-weight: 700; color: #1a1a2e; }
+.standing-pct { font-size: 22px; font-weight: 800; color: #c9a96e; }
+.standing-label { font-size: 12px; color: #6b7280; margin-bottom: 12px; }
+.standing-track {
+  background: #e5e7eb; border-radius: 99px; height: 10px;
+  position: relative; overflow: visible; margin-bottom: 8px;
+}
+.standing-fill {
+  height: 100%; border-radius: 99px;
+  background: linear-gradient(90deg, #c9a96e, #e0c992);
+  width: 80%; position: relative;
+}
+.standing-marker {
+  position: absolute; right: -1px; top: 50%; transform: translateY(-50%);
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #c9a96e; border: 3px solid #fff;
+  box-shadow: 0 2px 6px rgba(201,169,110,0.5);
+}
+.standing-sub { font-size: 12px; color: #9ca3af; }
+
+/* MODALS */
+.modal-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.45); z-index: 100;
+  display: flex; align-items: flex-end;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal-sheet {
+  background: #fff; width: 100%; border-radius: 20px 20px 0 0;
+  padding: 0 0 32px; max-height: 88%;
+  transform: translateY(20px); transition: transform 0.25s ease;
+  display: flex; flex-direction: column;
+}
+.modal-overlay.open .modal-sheet { transform: translateY(0); }
+.modal-drag { width: 36px; height: 4px; background: #e5e7eb; border-radius: 99px; margin: 12px auto 0; flex-shrink: 0; }
+.modal-header {
+  padding: 16px 20px 12px; border-bottom: 1px solid #f3f4f6; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.modal-title { font-size: 16px; font-weight: 700; color: #1a1a2e; }
+.modal-close { font-size: 20px; color: #9ca3af; cursor: pointer; line-height: 1; padding: 4px; }
+.modal-body { flex: 1; overflow-y: auto; padding: 16px 20px; }
+.modal-body::-webkit-scrollbar { display: none; }
+.modal-got-it {
+  margin: 0 20px; padding: 14px; background: #1a1a2e; color: #fff;
+  border: none; border-radius: 99px; font-size: 15px; font-weight: 600;
+  cursor: pointer; width: calc(100% - 40px); flex-shrink: 0;
+}
+
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="screen-wrapper">
+
+  <!-- =====================================================
+       SCREEN 1: HOME BANKING
+       ===================================================== -->
+  <div class="screen active" id="screen-home">
+    <div class="status-bar" style="background:#fff;">
+      <span>9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 24 18" fill="currentColor"><rect x="0" y="6" width="4" height="12" rx="1"/><rect x="6.5" y="4" width="4" height="14" rx="1"/><rect x="13" y="1.5" width="4" height="16.5" rx="1"/><rect x="19.5" y="0" width="4" height="18" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><path d="M2 6C5.5 2 10 0 12 0s6.5 2 10 6l-2.2 2.2C17 5.2 14.7 3.5 12 3.5S7 5.2 4.2 8.2L2 6z"/><path d="M5.5 9.5C7.5 7 9.5 5.5 12 5.5s4.5 1.5 6.5 4l-2.2 2.2C14.8 9.7 13.5 9 12 9s-2.8.7-4.3 2.7L5.5 9.5z"/><circle cx="12" cy="14" r="2.5"/></svg>
+        <svg width="25" height="12" viewBox="0 0 30 14" fill="currentColor"><rect x="0" y="1" width="22" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="3" width="17" height="8" rx="1.5"/><rect x="23" y="4" width="3" height="6" rx="1.5" opacity="0.4"/></svg>
+      </div>
+    </div>
+    <div class="scroll-body">
+      <div class="home-header">
+        <div class="home-welcome">Welcome!</div>
+        <div class="home-header-icons">
+          <div class="icon-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div class="icon-btn">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-actions">
+        <div class="qa-item">
+          <div class="qa-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <span class="qa-label">Pay</span>
+        </div>
+        <div class="qa-item">
+          <div class="qa-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg></div>
+          <span class="qa-label">Transfer</span>
+        </div>
+        <div class="qa-item">
+          <div class="qa-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+          <span class="qa-label">Receipts</span>
+        </div>
+        <div class="qa-item">
+          <div class="qa-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+          <span class="qa-label">Wishlist</span>
+        </div>
+      </div>
+
+      <!-- COMMUNITIES CAROUSEL -->
+      <div class="communities-home-section">
+        <div class="communities-home-title">Benefits for the things you love</div>
+        <div class="communities-home-sub">Your bank, working for what matters to you</div>
+      </div>
+      <div class="h-scroll" style="padding-bottom:12px;">
+        <div class="community-card cc-fine" onclick="goTo('screen-welcome')">
+          <div class="cc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+          </div>
+          <div class="cc-name">Fine Dining Club</div>
+          <div class="cc-members">3,400 members in Dubai</div>
+          <div class="cc-explore">Explore <span>→</span></div>
+        </div>
+        <div class="community-card cc-padel">
+          <div class="cc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48M7.38 12l5.74-9.94M9.69 16L3.95 6.06M14.31 16H2.83M16.62 12l-5.74 9.94"/></svg>
+          </div>
+          <div class="cc-name">Padel Crew</div>
+          <div class="cc-members">2,100 members in Dubai</div>
+          <div class="cc-explore">Explore <span>→</span></div>
+        </div>
+        <div class="community-card cc-parent">
+          <div class="cc-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="cc-name">Parenting Kit</div>
+          <div class="cc-members">5,600 members in UAE</div>
+          <div class="cc-explore">Explore <span>→</span></div>
+        </div>
+      </div>
+
+      <!-- BALANCE -->
+      <div class="balance-section">
+        <div class="balance-label">Balance</div>
+        <div class="balance-amount">AED 42,350.60</div>
+      </div>
+
+      <div class="accounts-carousel">
+        <div class="account-card">
+          <div class="account-num">*9012</div>
+          <div class="account-balance">AED 18,200</div>
+          <div class="account-type">Checking account</div>
+        </div>
+        <div class="account-card">
+          <div class="account-num">*3456</div>
+          <div class="account-balance">AED 9,150</div>
+          <div class="account-type">Savings account</div>
+        </div>
+        <div class="account-card">
+          <div class="account-num">*7812</div>
+          <div class="account-balance">AED 15,000</div>
+          <div class="account-type">Credit card</div>
+        </div>
+      </div>
+
+      <div class="transactions-section">
+        <div class="txn-header">Recent transactions</div>
+        <div class="txn-item">
+          <div class="txn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg></div>
+          <div class="txn-info"><div class="txn-name">Zuma Restaurant</div><div class="txn-date">Today</div></div>
+          <div class="txn-amount">AED 680</div>
+        </div>
+        <div class="txn-item">
+          <div class="txn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M14.31 8l5.74 9.94M9.69 8h11.48"/></svg></div>
+          <div class="txn-info"><div class="txn-name">Just Padel</div><div class="txn-date">Yesterday</div></div>
+          <div class="txn-amount">AED 120</div>
+        </div>
+        <div class="txn-item">
+          <div class="txn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg></div>
+          <div class="txn-info"><div class="txn-name">Carrefour</div><div class="txn-date">Monday</div></div>
+          <div class="txn-amount">AED 245</div>
+        </div>
+        <div class="txn-item">
+          <div class="txn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78"/></svg></div>
+          <div class="txn-info"><div class="txn-name">Babyshop</div><div class="txn-date">Sunday</div></div>
+          <div class="txn-amount">AED 390</div>
+        </div>
+      </div>
+    </div>
+  </div><!-- /screen-home -->
+
+
+  <!-- =====================================================
+       SCREEN 2: COMMUNITY WELCOME
+       ===================================================== -->
+  <div class="screen" id="screen-welcome">
+    <div class="status-bar dark" style="background:transparent;">
+      <span>9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 24 18" fill="currentColor"><rect x="0" y="6" width="4" height="12" rx="1"/><rect x="6.5" y="4" width="4" height="14" rx="1"/><rect x="13" y="1.5" width="4" height="16.5" rx="1"/><rect x="19.5" y="0" width="4" height="18" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><path d="M2 6C5.5 2 10 0 12 0s6.5 2 10 6l-2.2 2.2C17 5.2 14.7 3.5 12 3.5S7 5.2 4.2 8.2L2 6z"/><path d="M5.5 9.5C7.5 7 9.5 5.5 12 5.5s4.5 1.5 6.5 4l-2.2 2.2C14.8 9.7 13.5 9 12 9s-2.8.7-4.3 2.7L5.5 9.5z"/><circle cx="12" cy="14" r="2.5"/></svg>
+        <svg width="25" height="12" viewBox="0 0 30 14" fill="currentColor"><rect x="0" y="1" width="22" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="3" width="17" height="8" rx="1.5"/><rect x="23" y="4" width="3" height="6" rx="1.5" opacity="0.4"/></svg>
+      </div>
+    </div>
+    <div class="icon-btn" style="position:absolute;top:44px;left:16px;z-index:10;color:#fff;" onclick="goTo('screen-home')">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    </div>
+
+    <div class="welcome-body">
+      <div class="welcome-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+      </div>
+      <div class="welcome-title">Welcome to the<br>Fine Dining Club</div>
+      <div class="welcome-subtitle">We noticed you love dining out. Join 3,400 food lovers in Dubai for exclusive perks.</div>
+
+      <div class="welcome-perks">
+        <div class="perk-row">
+          <div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+          <div class="perk-text"><strong>Exclusive dining discounts</strong> from partner restaurants in Dubai</div>
+        </div>
+        <div class="perk-row">
+          <div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <div class="perk-text"><strong>See where people like you eat</strong> and discover hidden gems</div>
+        </div>
+        <div class="perk-row">
+          <div class="perk-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></div>
+          <div class="perk-text"><strong>Track your culinary journey</strong> and earn rewards as you explore</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="welcome-actions">
+      <button class="btn-gold" onclick="goTo('screen-dashboard')">Join this community</button>
+      <button class="btn-ghost" style="color:rgba(255,255,255,0.5);" onclick="goTo('screen-home')">Not for me</button>
+    </div>
+  </div><!-- /screen-welcome -->
+
+
+  <!-- =====================================================
+       SCREEN 3: DASHBOARD
+       ===================================================== -->
+  <div class="screen" id="screen-dashboard">
+    <div class="status-bar" style="background:#fff;">
+      <span>9:41</span>
+      <div class="status-icons">
+        <svg width="17" height="12" viewBox="0 0 24 18" fill="currentColor"><rect x="0" y="6" width="4" height="12" rx="1"/><rect x="6.5" y="4" width="4" height="14" rx="1"/><rect x="13" y="1.5" width="4" height="16.5" rx="1"/><rect x="19.5" y="0" width="4" height="18" rx="1" opacity="0.3"/></svg>
+        <svg width="16" height="12" viewBox="0 0 24 16" fill="currentColor"><path d="M2 6C5.5 2 10 0 12 0s6.5 2 10 6l-2.2 2.2C17 5.2 14.7 3.5 12 3.5S7 5.2 4.2 8.2L2 6z"/><path d="M5.5 9.5C7.5 7 9.5 5.5 12 5.5s4.5 1.5 6.5 4l-2.2 2.2C14.8 9.7 13.5 9 12 9s-2.8.7-4.3 2.7L5.5 9.5z"/><circle cx="12" cy="14" r="2.5"/></svg>
+        <svg width="25" height="12" viewBox="0 0 30 14" fill="currentColor"><rect x="0" y="1" width="22" height="12" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="2" y="3" width="17" height="8" rx="1.5"/><rect x="23" y="4" width="3" height="6" rx="1.5" opacity="0.4"/></svg>
+      </div>
+    </div>
+    <div class="nav-bar">
+      <div class="icon-btn" onclick="goTo('screen-home')">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+      </div>
+      <div class="nav-title">Fine Dining Club</div>
+      <div class="icon-btn">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      </div>
+    </div>
+
+    <!-- SCROLL BODY -->
+    <div class="scroll-body" id="dash-scroll">
+
+      <!-- ========== TAB 1: MY CLUB ========== -->
+      <div class="sub-screen active" id="sub-myclub">
+
+        <!-- DINING JOURNEY (gamification) -->
+        <div class="journey-card">
+          <div class="journey-title">Your Dining Journey</div>
+          <div class="journey-stats">
+            <div class="j-stat">
+              <div class="j-stat-val">12</div>
+              <div class="j-stat-label">Restaurants<br>this month</div>
+            </div>
+            <div class="j-stat">
+              <div class="j-stat-val">7</div>
+              <div class="j-stat-label">Cuisines<br>explored</div>
+            </div>
+            <div class="j-stat">
+              <div class="j-stat-val">3w</div>
+              <div class="j-stat-label">Current<br>streak</div>
+            </div>
+          </div>
+          <div class="badges-row">
+            <div class="badge-item">
+              <div class="badge-icon" style="background:#fef3c7;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+              </div>
+              <div class="badge-info">
+                <div class="badge-name">Cuisine Explorer</div>
+                <div class="badge-desc">5+ cuisines tried</div>
+              </div>
+            </div>
+            <div class="badge-item locked">
+              <div class="badge-icon" style="background:#f3f4f6;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <div class="badge-info">
+                <div class="badge-name">Gourmet Connoisseur</div>
+                <div class="badge-desc">20 unique restaurants</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- FEATURED BENEFIT -->
+        <div class="featured-benefit" onclick="switchDashTab('benefits', document.getElementById('tab-benefits'))">
+          <div class="fb-label">FEATURED BENEFIT</div>
+          <div class="fb-title">10% off at Zuma this weekend</div>
+          <div class="fb-sub">Valid Friday to Sunday. Show your membership at checkout.</div>
+          <div class="fb-cta">View all benefits <span>→</span></div>
+        </div>
+
+        <!-- RESTAURANTS (Discover Merchants) -->
+        <div class="section-header"><h2>Where Your Community Dines</h2><p>Popular with Fine Dining Club members</p></div>
+        <div class="merchant-tabs">
+          <div class="m-tab active">Trending Now</div>
+          <div class="m-tab">New Discoveries</div>
+        </div>
+        <div class="h-scroll" style="padding-bottom:8px;">
+          <div class="restaurant-card">
+            <div class="r-logo-row">
+              <div class="r-logo" style="background:#1a1a2e;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+              </div>
+              <div><div class="r-name">Zuma</div><div class="r-cuisine">Japanese Contemporary</div></div>
+            </div>
+            <div class="r-desc">Iconic izakaya-style dining at DIFC. A community favorite for celebrations.</div>
+            <div class="r-footer">
+              <div class="r-members">1,200 members dine here</div>
+              <div class="r-actions"><div class="r-action">👍</div><div class="r-action">👎</div></div>
+            </div>
+          </div>
+          <div class="restaurant-card">
+            <div class="r-logo-row">
+              <div class="r-logo" style="background:#7c3aed;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e0c992" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+              </div>
+              <div><div class="r-name">La Petite Maison</div><div class="r-cuisine">French Mediterranean</div></div>
+            </div>
+            <div class="r-desc">Riviera-inspired elegance at DIFC. Known for fresh, light dishes.</div>
+            <div class="r-footer">
+              <div class="r-members">890 members dine here</div>
+              <div class="r-actions"><div class="r-action">👍</div><div class="r-action">👎</div></div>
+            </div>
+          </div>
+          <div class="restaurant-card">
+            <div class="r-logo-row">
+              <div class="r-logo" style="background:#dc2626;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+              </div>
+              <div><div class="r-name">Nobu</div><div class="r-cuisine">Japanese-Peruvian Fusion</div></div>
+            </div>
+            <div class="r-desc">The global sushi empire's Atlantis outpost. Signature black cod miso.</div>
+            <div class="r-footer">
+              <div class="r-members">760 members dine here</div>
+              <div class="r-actions"><div class="r-action">👍</div><div class="r-action">👎</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="see-all">See all restaurants →</div>
+
+        <!-- QUICK READS (simplified explore) -->
+        <div class="section-header"><h2>Quick Reads</h2><p>Tips and stories for food lovers</p></div>
+        <div class="h-scroll" style="padding-bottom:8px;">
+          <div class="read-card">
+            <div class="read-img ri-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#b0a898" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+            </div>
+            <div class="read-body">
+              <div class="read-title">Dubai's Best Hidden Fine Dining Gems</div>
+              <div class="read-meta">4 min read</div>
+            </div>
+          </div>
+          <div class="read-card">
+            <div class="read-img ri-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#7bbbb5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l4 10H4L8 2z"/><path d="M12 12v6"/><path d="M8 22h8"/><path d="M4 12h16"/></svg>
+            </div>
+            <div class="read-body">
+              <div class="read-title">The Art of Wine Pairing: A Beginner's Guide</div>
+              <div class="read-meta">5 min read</div>
+            </div>
+          </div>
+          <div class="read-card">
+            <div class="read-img ri-3">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#9490b8" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            </div>
+            <div class="read-body">
+              <div class="read-title">Why Tasting Menus Are Taking Over the UAE</div>
+              <div class="read-meta">3 min read</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="page-footer">
+          <p>Powered by <strong style="color:#6b7280;">CLARITY AI</strong></p>
+        </div>
+      </div><!-- /sub-myclub -->
+
+
+      <!-- ========== TAB 2: BENEFITS ========== -->
+      <div class="sub-screen" id="sub-benefits">
+
+        <div class="section-header" style="padding-top:20px;"><h2>Active Rewards</h2></div>
+
+        <div class="reward-card">
+          <div class="reward-icon r-gold">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+          </div>
+          <div class="reward-body">
+            <div class="reward-title">Dining Cashback</div>
+            <div class="reward-subtitle">3% cashback on all restaurant spending, automatically applied</div>
+            <div class="reward-status rs-active"><span style="font-size:9px;">●</span> Active</div>
+            <div class="reward-earned">Earned this month: <strong>AED 42.80</strong></div>
+          </div>
+        </div>
+
+        <div class="reward-card">
+          <div class="reward-icon r-amber">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c2410c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          </div>
+          <div class="reward-body">
+            <div class="reward-title">Weekend Boost</div>
+            <div class="reward-subtitle">5% extra cashback at partner restaurants on Friday and Saturday</div>
+            <div class="reward-status rs-active"><span style="font-size:9px;">●</span> Active</div>
+            <div class="reward-earned">Used 3 times this month</div>
+          </div>
+        </div>
+
+        <div class="reward-card locked">
+          <div class="reward-icon r-gray">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="reward-body">
+            <div class="reward-title">Gourmet Tier Bonus</div>
+            <div class="reward-subtitle">Double cashback and priority reservations at partner venues</div>
+            <div class="reward-status rs-locked">Locked -- visit 20 unique restaurants to unlock</div>
+          </div>
+        </div>
+
+        <div class="section-header" style="padding-top:8px;"><h2>Partner Offers</h2></div>
+        <div class="benefit-grid">
+          <div class="benefit-card">
+            <div class="bp-logo" style="background:#1a1a2e;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+            </div>
+            <div class="bp-name">Zuma</div>
+            <div class="bp-discount">10% off</div>
+            <div class="bp-type">Japanese Contemporary</div>
+          </div>
+          <div class="benefit-card">
+            <div class="bp-logo" style="background:#7c3aed;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e0c992" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/></svg>
+            </div>
+            <div class="bp-name">La Petite Maison</div>
+            <div class="bp-discount">15% off</div>
+            <div class="bp-type">French Mediterranean</div>
+          </div>
+          <div class="benefit-card">
+            <div class="bp-logo" style="background:#dc2626;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></svg>
+            </div>
+            <div class="bp-name">Nobu</div>
+            <div class="bp-discount">12% off</div>
+            <div class="bp-type">Japanese-Peruvian</div>
+          </div>
+          <div class="benefit-card">
+            <div class="bp-logo" style="background:#059669;">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+            </div>
+            <div class="bp-name">Scalini</div>
+            <div class="bp-discount">10% off</div>
+            <div class="bp-type">Italian Fine Dining</div>
+          </div>
+        </div>
+
+        <div class="section-header" style="padding-top:12px;"><h2>Exclusive Experiences</h2><p>Members-only events</p></div>
+
+        <div class="exp-card">
+          <div class="exp-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+          </div>
+          <div class="exp-body">
+            <div class="exp-title">Chef's Table at Ossiano</div>
+            <div class="exp-desc">Private 7-course tasting with the head chef. Underwater dining at Atlantis.</div>
+            <div class="exp-badge">Members Only</div>
+          </div>
+        </div>
+
+        <div class="exp-card">
+          <div class="exp-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2h8l4 10H4L8 2z"/><path d="M12 12v6"/><path d="M8 22h8"/></svg>
+          </div>
+          <div class="exp-body">
+            <div class="exp-title">Wine Masterclass at Gaia</div>
+            <div class="exp-desc">Greek wines meets DIFC views. Next Saturday, 8 spots left.</div>
+            <div class="exp-badge">8 spots left</div>
+          </div>
+        </div>
+
+        <div class="page-footer">
+          <p>Benefits refresh monthly based on your activity.</p>
+          <p>Powered by <strong style="color:#6b7280;">CLARITY AI</strong></p>
+        </div>
+      </div><!-- /sub-benefits -->
+
+
+      <!-- ========== TAB 3: COMMUNITY ========== -->
+      <div class="sub-screen" id="sub-community">
+
+        <div class="comm-hero">
+          <div class="comm-hero-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+          </div>
+          <div class="comm-hero-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Member
+          </div>
+          <div class="comm-hero-title">Fine Dining Club</div>
+          <div class="comm-hero-sub">3,400 food lovers in Dubai sharing their passion for exceptional dining</div>
+          <div class="comm-hero-joined">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Joined since Feb 2026
+          </div>
+        </div>
+
+        <!-- COMMUNITY PULSE -->
+        <div class="section-header" style="padding-top:16px;"><h2>Community Pulse</h2><p>What the club is up to this month</p></div>
+        <div class="comm-stats-row">
+          <div class="comm-stat-card">
+            <div class="cs-val">8,200</div>
+            <div class="cs-label">Restaurant visits</div>
+          </div>
+          <div class="comm-stat-card">
+            <div class="cs-val">340</div>
+            <div class="cs-label">Unique restaurants</div>
+          </div>
+          <div class="comm-stat-card">
+            <div class="cs-val" style="font-size:13px;line-height:1.4;">Japanese</div>
+            <div class="cs-label">Top cuisine</div>
+          </div>
+        </div>
+
+        <!-- MONTHLY CHALLENGE -->
+        <div class="section-header" style="padding-top:16px;"><h2>Monthly Challenge</h2><p>Compete with your fellow club members</p></div>
+        <div class="challenge-card">
+          <div class="ch-top">
+            <div class="ch-title">World Cuisine Month</div>
+            <div class="ch-active">Active</div>
+          </div>
+          <div class="ch-desc">Try 5 different cuisines this month. From sushi to shakshuka, every new flavor counts.</div>
+
+          <div class="ch-progress-label">
+            <span>Community progress</span><span style="color:#c9a96e;font-weight:700;">2,310 / 3,400 members</span>
+          </div>
+          <div class="ch-track"><div class="ch-fill ch-fill-comm" style="width:68%;"></div></div>
+
+          <div class="ch-progress-label">
+            <span>Your progress</span><span style="color:#0f9b8e;font-weight:700;">3 / 5 cuisines</span>
+          </div>
+          <div class="ch-track"><div class="ch-fill ch-fill-you" style="width:60%;"></div></div>
+
+          <div class="ch-reward">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+            <div class="ch-reward-text">Complete it: unlock "Globe Trotter" badge</div>
+            <div class="ch-reward-badge">+50 pts</div>
+          </div>
+        </div>
+
+        <!-- YOUR STANDING -->
+        <div class="section-header" style="padding-top:16px;"><h2>Your Standing</h2><p>How you compare to other club members</p></div>
+        <div class="standing-card">
+          <div class="standing-top">
+            <div>
+              <div class="standing-title">Top 20%</div>
+              <div class="standing-label">of Fine Dining Club members in Dubai</div>
+            </div>
+            <div style="text-align:right;">
+              <div class="standing-pct">80th</div>
+              <div style="font-size:11px;color:#9ca3af;">percentile</div>
+            </div>
+          </div>
+          <div class="standing-track">
+            <div class="standing-fill">
+              <div class="standing-marker"></div>
+            </div>
+          </div>
+          <div class="standing-sub">You've dined at more unique restaurants than 80% of club members this month</div>
+        </div>
+
+        <div class="page-footer" style="margin-top:16px;">
+          <p>Community data refreshes weekly</p>
+          <p>Powered by <strong style="color:#6b7280;">CLARITY AI</strong></p>
+        </div>
+      </div><!-- /sub-community -->
+
+    </div><!-- /dash-scroll -->
+
+    <div class="tab-bar">
+      <div class="tab-item active" id="tab-myclub" onclick="switchDashTab('myclub', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8h1a4 4 0 0 1 0 8h-1M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/><line x1="6" y1="1" x2="6" y2="4"/><line x1="10" y1="1" x2="10" y2="4"/><line x1="14" y1="1" x2="14" y2="4"/></svg>
+        My Club
+      </div>
+      <div class="tab-item" id="tab-benefits" onclick="switchDashTab('benefits', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        Benefits
+      </div>
+      <div class="tab-item" id="tab-community" onclick="switchDashTab('community', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Community
+      </div>
+    </div>
+  </div><!-- /screen-dashboard -->
+
+  </div><!-- /screen-wrapper -->
+
+</div><!-- /phone -->
+
+<script>
+  // ---- SCREEN NAVIGATION ----
+  let currentScreen = 'screen-home';
+
+  function goTo(id) {
+    const from = document.getElementById(currentScreen);
+    const to   = document.getElementById(id);
+    if (!to || id === currentScreen) return;
+
+    from.classList.add('exit-left');
+    to.classList.add('active');
+
+    setTimeout(() => {
+      from.classList.remove('active', 'exit-left');
+    }, 260);
+
+    currentScreen = id;
+
+    const scroll = to.querySelector('.scroll-body');
+    if (scroll) scroll.scrollTop = 0;
+    const dashScroll = document.getElementById('dash-scroll');
+    if (id === 'screen-dashboard' && dashScroll) dashScroll.scrollTop = 0;
+  }
+
+  // ---- DASHBOARD TABS ----
+  function switchDashTab(tab, el) {
+    document.querySelectorAll('#screen-dashboard .tab-item').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('#screen-dashboard .sub-screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('sub-' + tab).classList.add('active');
+    document.getElementById('dash-scroll').scrollTop = 0;
+  }
+
+  // ---- MERCHANT TABS ----
+  document.querySelectorAll('.m-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.m-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+
+  // ---- DRAG-TO-SCROLL ----
+  function addDragScroll(el) {
+    let isDown = false, startX, scrollLeft;
+    el.addEventListener('mousedown', e => {
+      isDown = true; el.classList.add('dragging');
+      startX = e.pageX - el.offsetLeft; scrollLeft = el.scrollLeft;
+    });
+    el.addEventListener('mouseleave', () => { isDown = false; el.classList.remove('dragging'); });
+    el.addEventListener('mouseup', () => { isDown = false; el.classList.remove('dragging'); });
+    el.addEventListener('mousemove', e => {
+      if (!isDown) return; e.preventDefault();
+      const x = e.pageX - el.offsetLeft;
+      el.scrollLeft = scrollLeft - (x - startX);
+    });
+  }
+  document.querySelectorAll('.h-scroll, .accounts-carousel').forEach(addDragScroll);
+
+  // ---- MODALS ----
+  function openModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('open');
+  }
+  function closeModal(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('open');
+  }
+  function handleOverlayClick(e, id) {
+    if (e.target === e.currentTarget) closeModal(id);
+  }
+</script>
+</body>
+</html>
