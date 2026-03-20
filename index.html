@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Communities Prototypes — Clarity AI</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:#f7f8fa; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+.container { text-align:center; padding:48px 32px; }
+.logo { font-size:11px; font-weight:700; letter-spacing:2px; color:#9ca3af; text-transform:uppercase; margin-bottom:32px; }
+h1 { font-size:28px; font-weight:700; color:#1a1a2e; margin-bottom:8px; letter-spacing:-0.5px; }
+.subtitle { font-size:14px; color:#6b7280; margin-bottom:40px; }
+.cards { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+.card { background:#fff; border:1.5px solid #e5e7eb; border-radius:16px; padding:32px 36px; width:220px; text-decoration:none; color:#1a1a2e; transition:all 0.2s; }
+.card:hover { border-color:#4CA38A; box-shadow:0 4px 20px rgba(76,163,138,0.15); transform:translateY(-2px); }
+.card-icon { font-size:28px; margin-bottom:12px; }
+.card-title { font-size:16px; font-weight:700; margin-bottom:4px; }
+.card-desc { font-size:12px; color:#6b7280; }
+.footer { margin-top:40px; font-size:11px; color:#9ca3af; }
+</style>
+</head>
+<body>
+<script>
+(function() {
+  var correct = 'values2026';
+  if (sessionStorage.getItem('auth') !== correct) {
+    document.body.style.display = 'none';
+    window.addEventListener('DOMContentLoaded', function() {
+      document.body.style.display = '';
+      var ov = document.createElement('div');
+      ov.id = '__pw_overlay';
+      ov.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#f7f8fa;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
+      ov.innerHTML = '<div style="text-align:center;background:#fff;padding:40px 48px;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,0.08);"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#9ca3af;text-transform:uppercase;margin-bottom:16px;">Clarity AI</div><div style="font-size:22px;font-weight:700;color:#1a1a2e;margin-bottom:6px;">Communities Prototypes</div><div style="font-size:13px;color:#6b7280;margin-bottom:24px;">Internal use only</div><input id="__pw" type="password" placeholder="Contrasena" style="display:block;width:100%;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:12px;outline:none;" /><button onclick="__check()" style="width:100%;padding:10px;background:#4CA38A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">Entrar</button><div id="__err" style="color:#dc2626;font-size:12px;margin-top:10px;display:none;">Contrasena incorrecta</div></div>';
+      document.body.appendChild(ov);
+      document.getElementById('__pw').focus();
+      document.getElementById('__pw').addEventListener('keydown', function(e){ if(e.key==='Enter') __check(); });
+    });
+    window.__check = function() {
+      if (document.getElementById('__pw').value === correct) {
+        sessionStorage.setItem('auth', correct);
+        document.getElementById('__pw_overlay').remove();
+      } else {
+        document.getElementById('__err').style.display = 'block';
+        document.getElementById('__pw').value = '';
+      }
+    };
+  }
+})();
+</script>
+<div class="container">
+  <div class="logo">Clarity AI</div>
+  <h1>Communities Prototypes</h1>
+  <div class="subtitle">Internal use only &middot; Select a prototype to explore</div>
+  <div class="cards">
+    <a class="card" href="/values.html">
+      <div class="card-icon">&#9829;</div>
+      <div class="card-title">Human Rights</div>
+      <div class="card-desc">Values-based prototype</div>
+    </a>
+    <a class="card" href="/finedining.html">
+      <div class="card-icon">&#127860;</div>
+      <div class="card-title">Fine Dining Club</div>
+      <div class="card-desc">Lifestyle community prototype</div>
+    </a>
+  </div>
+  <div class="footer">Powered by <strong style="color:#6b7280;">CLARITY AI</strong></div>
+</div>
+</body>
+</html>
