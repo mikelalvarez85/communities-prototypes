@@ -3,116 +3,264 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Communities Prototypes</title>
+  <title>Communities Prototypes · Clarity AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mulish:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background-color: #f0f2f5;
+      font-family: 'Mulish', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background:
+        radial-gradient(circle at 92% 8%, rgba(34, 168, 107, 0.10), transparent 50%),
+        radial-gradient(circle at 8% 92%, rgba(93, 78, 194, 0.10), transparent 50%),
+        linear-gradient(180deg, #f7f8fa 0%, #eef0f5 100%);
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 20px;
+      padding: 48px 24px;
+      color: #1a1d2e;
     }
 
     .brand {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 0.18em;
-      color: #9aa5b4;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+      color: #5d4ec2;
       text-transform: uppercase;
-      margin-bottom: 28px;
+      margin-bottom: 18px;
+      padding: 6px 14px;
+      border-radius: 99px;
+      background: #fff;
+      border: 1px solid rgba(93, 78, 194, 0.18);
+      box-shadow: 0 2px 8px rgba(93, 78, 194, 0.08);
     }
+    .brand svg { width: 11px; height: 11px; color: #c9a96e; }
 
     h1 {
-      font-size: 42px;
-      font-weight: 800;
+      font-size: 38px;
+      font-weight: 900;
       color: #1a1d2e;
       text-align: center;
-      margin-bottom: 12px;
-      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+      letter-spacing: -0.8px;
+      line-height: 1.1;
+      max-width: 720px;
     }
+    h1 em { color: #c9a96e; font-style: normal; font-weight: 900; }
 
     .subtitle {
-      font-size: 16px;
+      font-size: 15px;
       color: #6b7280;
       text-align: center;
-      margin-bottom: 52px;
+      margin-bottom: 48px;
+      max-width: 560px;
+      line-height: 1.55;
     }
 
     .cards {
-      display: flex;
-      gap: 24px;
-      flex-wrap: wrap;
-      justify-content: center;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      max-width: 1100px;
+      width: 100%;
     }
+    @media (max-width: 980px) { .cards { grid-template-columns: 1fr; max-width: 380px; } }
 
     .card {
       background: #ffffff;
-      border-radius: 20px;
-      padding: 48px 40px;
-      width: 320px;
+      border-radius: 22px;
+      padding: 28px 26px 26px;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
-      cursor: pointer;
       text-decoration: none;
-      transition: box-shadow 0.2s ease, transform 0.2s ease;
-      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      transition: box-shadow 0.25s ease, transform 0.2s ease;
+      box-shadow: 0 2px 10px rgba(26, 31, 113, 0.06);
+      border: 1px solid rgba(26, 31, 113, 0.06);
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
     }
-
     .card:hover {
-      box-shadow: 0 8px 30px rgba(0,0,0,0.10);
-      transform: translateY(-3px);
+      box-shadow: 0 16px 40px rgba(26, 31, 113, 0.12);
+      transform: translateY(-4px);
     }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .card.c1::before { background: radial-gradient(circle, rgba(93, 78, 194, 0.18), transparent 70%); }
+    .card.c2::before { background: radial-gradient(circle, rgba(201, 169, 110, 0.22), transparent 70%); }
+    .card.c3::before { background: radial-gradient(circle, rgba(34, 168, 107, 0.22), transparent 70%); }
+
+    .card-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 99px;
+      margin-bottom: 14px;
+      align-self: flex-start;
+      position: relative;
+      z-index: 1;
+    }
+    .card.c1 .card-tag { background: #EDE9FE; color: #5d4ec2; }
+    .card.c2 .card-tag { background: #FAF0DC; color: #92671b; }
+    .card.c3 .card-tag { background: #E8F5EC; color: #15803d; }
 
     .card-title {
-      font-size: 18px;
-      font-weight: 700;
+      font-size: 22px;
+      font-weight: 800;
       color: #1a1d2e;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      letter-spacing: -0.4px;
+      line-height: 1.2;
+      position: relative; z-index: 1;
     }
 
-    .card-subtitle {
-      font-size: 14px;
-      color: #9aa5b4;
+    .card-desc {
+      font-size: 13px;
+      color: #6b7280;
+      line-height: 1.55;
+      margin-bottom: 22px;
+      flex: 1;
+      position: relative; z-index: 1;
+    }
+
+    .card-stats {
+      list-style: none;
+      margin-bottom: 22px;
+      padding: 0;
+      position: relative; z-index: 1;
+    }
+    .card-stats li {
+      font-size: 12px;
+      color: #4b5563;
+      padding: 5px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      line-height: 1.45;
+    }
+    .card-stats li::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      margin-top: 6px;
+      flex-shrink: 0;
+    }
+    .card.c1 .card-stats li::before { background: #5d4ec2; }
+    .card.c2 .card-stats li::before { background: #c9a96e; }
+    .card.c3 .card-stats li::before { background: #22A86B; }
+
+    .card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 800;
+      padding: 11px 18px;
+      border-radius: 99px;
+      align-self: flex-start;
+      position: relative; z-index: 1;
+      transition: gap 0.2s ease;
+    }
+    .card:hover .card-cta { gap: 10px; }
+    .card.c1 .card-cta { background: #5d4ec2; color: #fff; }
+    .card.c2 .card-cta { background: #1a1a2e; color: #fff; }
+    .card.c3 .card-cta { background: linear-gradient(135deg, #15803d, #22A86B); color: #fff; }
+
+    .card-latest {
+      position: absolute;
+      top: 16px; right: 16px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #15803d;
+      background: #E8F5EC;
+      padding: 3px 8px;
+      border-radius: 99px;
+      text-transform: uppercase;
+      z-index: 2;
     }
 
     .footer {
-      margin-top: 60px;
-      font-size: 13px;
+      margin-top: 56px;
+      font-size: 12px;
       color: #9aa5b4;
+      text-align: center;
+      line-height: 1.7;
     }
-
-    .footer strong {
-      color: #6b7280;
-    }
+    .footer strong { color: #5d4ec2; font-weight: 800; }
   </style>
 </head>
 <body>
 
-  <p class="brand">Clarity AI</p>
-
-  <h1>Communities | Values | Prototypes</h1>
-  <p class="subtitle">Internal use only &middot; Select a prototype to explore</p>
-
-  <div class="cards">
-    <a class="card" href="combined.html">
-      <div class="card-title">Values &amp; Communities</div>
-      <div class="card-subtitle">Combined Prototype</div>
-    </a>
-
-    <a class="card" href="communities.html">
-      <div class="card-title">Communities</div>
-      <div class="card-subtitle">Lifestyle Communities</div>
-    </a>
+  <div class="brand">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0l2.5 8 7.5 2.5-7.5 2.5L12 21l-2.5-8L2 10.5 9.5 8z"/></svg>
+    Clarity AI · Internal
   </div>
 
-  <p class="footer">Powered by <strong>Clarity AI</strong></p>
+  <h1>Communities · Values<br>Three <em>concept directions</em></h1>
+  <p class="subtitle">Three distinct ways to think about behavioral personalization for retail banking. Select one to explore.</p>
+
+  <div class="cards">
+
+    <a class="card c1" href="combined.html">
+      <div class="card-tag">Concept 1 · Values-led</div>
+      <div class="card-title">Values-Led</div>
+      <div class="card-desc">User declares the values they want their money to promote. Lifestyle communities live as a sub-feature inside each value.</div>
+      <ul class="card-stats">
+        <li>4 declared values + 4-step onboarding</li>
+        <li>Communities nested inside each value</li>
+        <li>Sustainability through declared intent</li>
+      </ul>
+      <div class="card-cta">Open prototype →</div>
+    </a>
+
+    <a class="card c2" href="communities.html">
+      <div class="card-tag">Concept 2 · Lifestyle</div>
+      <div class="card-title">Lifestyle Communities</div>
+      <div class="card-desc">Pure lifestyle. Communities detected from transactions: Fine Dining, Padel, Parents. No values layer, no sustainability lens.</div>
+      <ul class="card-stats">
+        <li>Detected from spending patterns</li>
+        <li>Exclusive perks &amp; verified peers</li>
+        <li>Gamification: tier, streaks, badges</li>
+      </ul>
+      <div class="card-cta">Open prototype →</div>
+    </a>
+
+    <a class="card c3" href="conscious.html">
+      <div class="card-latest">Latest</div>
+      <div class="card-tag">Concept 3 · Conscious</div>
+      <div class="card-title">Conscious Lifestyle</div>
+      <div class="card-desc">Lifestyle communities with sustainability integrated as the Clarity AI lens inside each one. The bank that knows your lifestyle and helps you live it better.</div>
+      <ul class="card-stats">
+        <li>Conscious tips per community (B-Corp, Km 0, etc)</li>
+        <li>Community Pulse · peer-aggregated insights</li>
+        <li>Crowdsourcing + recurring entry + wrap concept</li>
+      </ul>
+      <div class="card-cta">Open prototype →</div>
+    </a>
+
+  </div>
+
+  <p class="footer">Powered by <strong>Clarity AI</strong> · Internal use only<br>Password protected · Confidential</p>
 
 <script>(function(){var c='values2026';if(sessionStorage.getItem('auth')!==c){var o=document.createElement('div');o.id='__pwo';o.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:#f7f8fa;display:flex;align-items:center;justify-content:center;z-index:99999;font-family:-apple-system,sans-serif;';o.innerHTML='<div style="text-align:center;background:#fff;padding:40px 48px;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.08)"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#9ca3af;text-transform:uppercase;margin-bottom:16px">CLARITY AI</div><div style="font-size:22px;font-weight:700;color:#1a1a2e;margin-bottom:6px">Communities Prototypes</div><div style="font-size:13px;color:#6b7280;margin-bottom:24px">Internal use only</div><input id="__pw" type="password" placeholder="Contrasena" style="display:block;width:100%;padding:10px 14px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:14px;box-sizing:border-box;margin-bottom:12px;outline:none"><button onclick="__ck()" style="width:100%;padding:10px;background:#4CA38A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">Entrar</button><div id="__er" style="color:#dc2626;font-size:12px;margin-top:10px;display:none">Contrasena incorrecta</div></div>';document.body.insertBefore(o,document.body.firstChild);document.getElementById('__pw').addEventListener('keydown',function(e){if(e.key==='Enter')__ck();});window.__ck=function(){if(document.getElementById('__pw').value===c){sessionStorage.setItem('auth',c);document.getElementById('__pwo').remove();}else{document.getElementById('__er').style.display='block';document.getElementById('__pw').value='';}};}}());</script>
 </body>
