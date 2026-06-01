@@ -66,12 +66,12 @@
 
     .cards {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 20px;
-      max-width: 1100px;
+      max-width: 760px;
       width: 100%;
     }
-    @media (max-width: 980px) { .cards { grid-template-columns: 1fr; max-width: 380px; } }
+    @media (max-width: 760px) { .cards { grid-template-columns: 1fr; max-width: 380px; } }
 
     .card {
       background: #ffffff;
@@ -100,8 +100,7 @@
       pointer-events: none;
     }
     .card.c1::before { background: radial-gradient(circle, rgba(93, 78, 194, 0.18), transparent 70%); }
-    .card.c2::before { background: radial-gradient(circle, rgba(201, 169, 110, 0.22), transparent 70%); }
-    .card.c3::before { background: radial-gradient(circle, rgba(34, 168, 107, 0.22), transparent 70%); }
+    .card.c2::before { background: radial-gradient(circle, rgba(34, 168, 107, 0.22), transparent 70%); }
 
     .card-tag {
       display: inline-flex;
@@ -119,8 +118,7 @@
       z-index: 1;
     }
     .card.c1 .card-tag { background: #EDE9FE; color: #5d4ec2; }
-    .card.c2 .card-tag { background: #FAF0DC; color: #92671b; }
-    .card.c3 .card-tag { background: #E8F5EC; color: #15803d; }
+    .card.c2 .card-tag { background: #E8F5EC; color: #15803d; }
 
     .card-title {
       font-size: 22px;
@@ -165,8 +163,7 @@
       flex-shrink: 0;
     }
     .card.c1 .card-stats li::before { background: #5d4ec2; }
-    .card.c2 .card-stats li::before { background: #c9a96e; }
-    .card.c3 .card-stats li::before { background: #22A86B; }
+    .card.c2 .card-stats li::before { background: #22A86B; }
 
     .card-cta {
       display: inline-flex;
@@ -182,8 +179,7 @@
     }
     .card:hover .card-cta { gap: 10px; }
     .card.c1 .card-cta { background: #5d4ec2; color: #fff; }
-    .card.c2 .card-cta { background: #1a1a2e; color: #fff; }
-    .card.c3 .card-cta { background: linear-gradient(135deg, #15803d, #22A86B); color: #fff; }
+    .card.c2 .card-cta { background: linear-gradient(135deg, #15803d, #22A86B); color: #fff; }
 
     .card-latest {
       position: absolute;
@@ -216,8 +212,8 @@
     Clarity AI · Internal
   </div>
 
-  <h1>Communities · Values<br>Three <em>concept directions</em></h1>
-  <p class="subtitle">Three distinct ways to think about behavioral personalization for retail banking. Select one to explore.</p>
+  <h1>Communities · Values<br>Two <em>concept directions</em></h1>
+  <p class="subtitle">Two distinct ways to think about behavioral personalization for retail banking. Select one to explore.</p>
 
   <div class="cards">
 
@@ -234,26 +230,14 @@
     </a>
 
     <a class="card c2" href="communities.html">
+      <div class="card-latest">Latest</div>
       <div class="card-tag">Concept 2 · Lifestyle</div>
       <div class="card-title">Lifestyle Communities</div>
-      <div class="card-desc">Pure lifestyle. Communities detected from transactions: Fine Dining, Padel, Parents. No values layer, no sustainability lens.</div>
+      <div class="card-desc">Lifestyle communities detected from transactions, with the Clarity AI conscious lens integrated inside each one. The bank that knows your lifestyle and helps you live it better.</div>
       <ul class="card-stats">
         <li>Detected from spending patterns</li>
-        <li>Exclusive perks &amp; verified peers</li>
-        <li>Gamification: tier, streaks, badges</li>
-      </ul>
-      <div class="card-cta">Open prototype →</div>
-    </a>
-
-    <a class="card c3" href="conscious.html">
-      <div class="card-latest">Latest</div>
-      <div class="card-tag">Concept 3 · Conscious</div>
-      <div class="card-title">Conscious Lifestyle</div>
-      <div class="card-desc">Lifestyle communities with sustainability integrated as the Clarity AI lens inside each one. The bank that knows your lifestyle and helps you live it better.</div>
-      <ul class="card-stats">
         <li>Conscious tips per community (B-Corp, Km 0, etc)</li>
-        <li>Community Pulse · peer-aggregated insights</li>
-        <li>Crowdsourcing + recurring entry + wrap concept</li>
+        <li>Exclusive perks, peer insights &amp; gamification</li>
       </ul>
       <div class="card-cta">Open prototype →</div>
     </a>
